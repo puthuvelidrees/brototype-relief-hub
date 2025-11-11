@@ -1,0 +1,65 @@
+import { useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import ComplaintForm from "@/components/ComplaintForm";
+import Navbar from "@/components/Navbar";
+import { Button } from "@/components/ui/button";
+import { Phone } from "lucide-react";
+
+export default function StudentPortal() {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate("/auth");
+    }
+  }, [user, loading, navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!user) return null;
+
+  const handleEmergencyCall = () => {
+    window.location.href = "tel:+911234567890";
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      
+      <main className="container mx-auto px-4 py-8">
+        <div className="max-w-3xl mx-auto space-y-6">
+          <div className="text-center space-y-2">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              Welcome to Brototype
+            </h1>
+            <p className="text-muted-foreground">
+              We're here to help. Submit your complaint and we'll get back to you soon.
+            </p>
+          </div>
+
+          <ComplaintForm onSuccess={() => navigate("/my-complaints")} />
+
+          <div className="flex justify-center">
+            <Button
+              onClick={handleEmergencyCall}
+              variant="outline"
+              size="lg"
+              className="gap-2"
+            >
+              <Phone className="h-5 w-5" />
+              24/7 Emergency Helpline
+            </Button>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}

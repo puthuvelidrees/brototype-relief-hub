@@ -1,0 +1,150 @@
+import { useEffect, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import Navbar from "@/components/Navbar";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { FileText, ExternalLink, Calendar, MapPin } from "lucide-react";
+import { format } from "date-fns";
+
+interface Complaint {
+  id: string;
+  ticket_id: string;
+  student_name: string;
+  mobile: string;
+  description: string;
+  status: "pending" | "in_progress" | "resolved";
+  file_url: string | null;
+  file_type: string | null;
+  created_at: string;
+  locations: { name: string };
+}
+
+export default function MyComplaints() {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+  const [complaints, setComplaints] = useState<Complaint[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate("/auth");
+    }
+  }, [user, loading, navigate]);
+
+  useEffect(() => {
+    if (user) {
+      fetchComplaints();
+    }
+  }, [user]);
+
+  const fetchComplaints = async () => {
+    if (!user) return;
+    
+    const { data, error } = await supabase
+      .from("complaints")
+      .select(`
+        *,
+        locations (name)
+      `)
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+
+    if (!error && data) {
+      setComplaints(data);
+    }
+    setIsLoading(false);
+  };
+
+  if (loading || isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!user) return null;
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "pending": return "bg-warning text-warning-foreground";
+      case "in_progress": return "bg-primary text-primary-foreground";
+      case "resolved": return "bg-success text-success-foreground";
+      default: return "bg-muted text-muted-foreground";
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      
+      <main className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto space-y-6">
+          <div className="text-center space-y-2">
+            <h1 className="text-4xl font-bold">My Complaints</h1>
+            <p className="text-muted-foreground">
+              Track the status of your submitted complaints
+            </p>
+          </div>
+
+          {complaints.length === 0 ? (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-muted-foreground">No complaints submitted yet</p>
+                <Button onClick={() => navigate("/")} className="mt-4">
+                  Submit Your First Complaint
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {complaints.map((complaint) => (
+                <Card key={complaint.id} className="hover:shadow-md transition-shadow">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <CardTitle className="flex items-center gap-2">
+                          Ticket #{complaint.ticket_id}
+                          <Badge className={getStatusColor(complaint.status)}>
+                            {complaint.status.replace("_", " ").toUpperCase()}
+                          </Badge>
+                        </CardTitle>
+                        <CardDescription className="mt-2 flex items-center gap-4">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="h-4 w-4" />
+                            {format(new Date(complaint.created_at), "PPP")}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <MapPin className="h-4 w-4" />
+                            {complaint.locations.name}
+                          </span>
+                        </CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm mb-4">{complaint.description}</p>
+                    {complaint.file_url && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open(complaint.file_url!, "_blank")}
+                      >
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        View Attachment
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      </main>
+    </div>
+  );
+}
