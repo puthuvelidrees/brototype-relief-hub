@@ -1,4 +1,4 @@
-export type Language = 'en' | 'hi' | 'ml';
+export type Language = 'en' | 'hi' | 'ml' | 'ta';
 
 export type TranslationKeys = {
   // Navbar
@@ -241,5 +241,65 @@ export const translations: Record<Language, TranslationKeys> = {
     success: 'വിജയം',
     cancel: 'റദ്ദാക്കുക',
     save: 'സേവ് ചെയ്യുക',
+  },
+  ta: {
+    // Navbar
+    appTitle: 'ப்ரோடோடைப் புகார்கள்',
+    submit: 'சமர்ப்பிக்கவும்',
+    myComplaints: 'எனது புகார்கள்',
+    admin: 'நிர்வாகி',
+    signOut: 'வெளியேறு',
+    
+    // Auth Page
+    signIn: 'உள்நுழைக',
+    signUp: 'பதிவு செய்க',
+    email: 'மின்னஞ்சல்',
+    password: 'கடவுச்சொல்',
+    fullName: 'முழு பெயர்',
+    mobileNumber: 'கைபேசி எண்',
+    forgotPassword: 'கடவுச்சொல்லை மறந்துவிட்டீர்களா?',
+    sendResetLink: 'மீட்டமை இணைப்பை அனுப்பு',
+    backToSignIn: 'உள்நுழைவுக்குத் திரும்பு',
+    resetPassword: 'கடவுச்சொல்லை மீட்டமை',
+    
+    // Student Portal
+    welcomeTitle: 'மாணவர் புகார் போர்டல்',
+    welcomeSubtitle: 'உங்கள் புகார்களைச் சமர்ப்பித்து அவற்றின் நிலையைக் கண்காணிக்கவும்',
+    submitComplaint: 'புகார் சமர்ப்பிக்கவும்',
+    complaintType: 'புகார் வகை',
+    location: 'இடம்',
+    selectLocation: 'உங்கள் இடத்தைத் தேர்ந்தெடுக்கவும்',
+    domain: 'டொமைன்',
+    selectDomain: 'டொமைனைத் தேர்ந்தெடுக்கவும்',
+    description: 'விளக்கம்',
+    submitButton: 'புகாரைச் சமர்ப்பிக்கவும்',
+    
+    // Complaint Types
+    technical: 'தொழில்நுட்பம்',
+    facility: 'வசதி',
+    academic: 'கல்வி',
+    administrative: 'நிர்வாக',
+    other: 'மற்றவை',
+    
+    // My Complaints
+    myComplaintsTitle: 'எனது புகார்கள்',
+    status: 'நிலை',
+    pending: 'நிலுவையில்',
+    inProgress: 'முன்னேற்றத்தில்',
+    resolved: 'தீர்க்கப்பட்டது',
+    noComplaints: 'புகார்கள் இல்லை',
+    
+    // Admin Dashboard
+    adminDashboard: 'நிர்வாக டாஷ்போர்டு',
+    allComplaints: 'அனைத்து புகார்கள்',
+    complaintDetails: 'புகார் விவரங்கள்',
+    updateStatus: 'நிலையை புதுப்பிக்கவும்',
+    
+    // Common
+    loading: 'ஏற்றுகிறது...',
+    error: 'பிழை',
+    success: 'வெற்றி',
+    cancel: 'ரத்து செய்',
+    save: 'சேமி',
   },
 };

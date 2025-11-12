@@ -55,6 +55,7 @@ export default function Navbar() {
                 <SelectItem value="en">English</SelectItem>
                 <SelectItem value="hi">हिन्दी</SelectItem>
                 <SelectItem value="ml">മലയാളം</SelectItem>
+                <SelectItem value="ta">தமிழ்</SelectItem>
               </SelectContent>
             </Select>
 
