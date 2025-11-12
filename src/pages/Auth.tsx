@@ -22,7 +22,7 @@ const signInSchema = z.object({
 
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
-  const { signUp, signIn } = useAuth();
+  const { signUp, signIn, resetPassword } = useAuth();
   const { toast } = useToast();
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -121,6 +121,46 @@ export default function Auth() {
     }
   };
 
+  const handleResetPassword = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    
+    const data = {
+      email: formData.get("resetEmail") as string,
+    };
+
+    try {
+      const emailSchema = z.string().trim().email("Invalid email address");
+      emailSchema.parse(data.email);
+      setIsLoading(true);
+
+      const { error } = await resetPassword(data.email);
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Success!",
+          description: "Password reset link sent to your email. Please check your inbox.",
+        });
+      }
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        toast({
+          title: "Validation error",
+          description: err.errors[0].message,
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-accent/10 p-4">
       <Card className="w-full max-w-md shadow-lg">
@@ -132,9 +172,10 @@ export default function Auth() {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="signin">Sign In</TabsTrigger>
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              <TabsTrigger value="reset">Reset</TabsTrigger>
             </TabsList>
             
             <TabsContent value="signin">
@@ -210,6 +251,24 @@ export default function Auth() {
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? "Creating account..." : "Sign Up"}
+                </Button>
+              </form>
+            </TabsContent>
+            
+            <TabsContent value="reset">
+              <form onSubmit={handleResetPassword} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="resetEmail">Email</Label>
+                  <Input
+                    id="resetEmail"
+                    name="resetEmail"
+                    type="email"
+                    placeholder="your.email@example.com"
+                    required
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? "Sending reset link..." : "Send Reset Link"}
                 </Button>
               </form>
             </TabsContent>
