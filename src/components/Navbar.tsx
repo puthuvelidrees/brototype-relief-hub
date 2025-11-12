@@ -26,15 +26,19 @@ export default function Navbar() {
           <div className="flex items-center gap-2">
             {user && (
               <>
-                <Button asChild variant="ghost" size="sm" className="hidden sm:flex">
-                  <Link to="/">
-                    <User className="h-4 w-4 mr-2" />
-                    {t.submit}
-                  </Link>
-                </Button>
-                <Button asChild variant="ghost" size="sm" className="hidden sm:flex">
-                  <Link to="/my-complaints">{t.myComplaints}</Link>
-                </Button>
+                {!isAdmin && (
+                  <>
+                    <Button asChild variant="ghost" size="sm" className="hidden sm:flex">
+                      <Link to="/">
+                        <User className="h-4 w-4 mr-2" />
+                        {t.submit}
+                      </Link>
+                    </Button>
+                    <Button asChild variant="ghost" size="sm" className="hidden sm:flex">
+                      <Link to="/my-complaints">{t.myComplaints}</Link>
+                    </Button>
+                  </>
+                )}
                 {isAdmin && (
                   <>
                     <Button asChild variant="ghost" size="sm" className="hidden sm:flex">
