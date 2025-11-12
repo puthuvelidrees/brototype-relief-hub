@@ -3,7 +3,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Moon, Sun, LogOut, Shield, User, Languages } from "lucide-react";
+import { Moon, Sun, LogOut, Shield, User, Languages, Users } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 export default function Navbar() {
@@ -36,12 +36,20 @@ export default function Navbar() {
                   <Link to="/my-complaints">{t.myComplaints}</Link>
                 </Button>
                 {isAdmin && (
-                  <Button asChild variant="ghost" size="sm" className="hidden sm:flex">
-                    <Link to="/admin">
-                      <Shield className="h-4 w-4 mr-2" />
-                      {t.admin}
-                    </Link>
-                  </Button>
+                  <>
+                    <Button asChild variant="ghost" size="sm" className="hidden sm:flex">
+                      <Link to="/admin">
+                        <Shield className="h-4 w-4 mr-2" />
+                        {t.admin}
+                      </Link>
+                    </Button>
+                    <Button asChild variant="ghost" size="sm" className="hidden sm:flex">
+                      <Link to="/admin/users">
+                        <Users className="h-4 w-4 mr-2" />
+                        Users
+                      </Link>
+                    </Button>
+                  </>
                 )}
               </>
             )}
