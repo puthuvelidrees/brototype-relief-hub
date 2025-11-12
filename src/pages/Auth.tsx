@@ -22,6 +22,7 @@ const signInSchema = z.object({
 
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
+  const [showResetForm, setShowResetForm] = useState(false);
   const { signUp, signIn, resetPassword } = useAuth();
   const { toast } = useToast();
 
@@ -172,38 +173,75 @@ export default function Auth() {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">Sign In</TabsTrigger>
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
-              <TabsTrigger value="reset">Reset</TabsTrigger>
             </TabsList>
             
             <TabsContent value="signin">
-              <form onSubmit={handleSignIn} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signinEmail">Email</Label>
-                  <Input
-                    id="signinEmail"
-                    name="signinEmail"
-                    type="email"
-                    placeholder="your.email@example.com"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signinPassword">Password</Label>
-                  <Input
-                    id="signinPassword"
-                    name="signinPassword"
-                    type="password"
-                    placeholder="••••••"
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Signing in..." : "Sign In"}
-                </Button>
-              </form>
+              {!showResetForm ? (
+                <form onSubmit={handleSignIn} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signinEmail">Email</Label>
+                    <Input
+                      id="signinEmail"
+                      name="signinEmail"
+                      type="email"
+                      placeholder="your.email@example.com"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signinPassword">Password</Label>
+                    <Input
+                      id="signinPassword"
+                      name="signinPassword"
+                      type="password"
+                      placeholder="••••••"
+                      required
+                    />
+                  </div>
+                  <div className="flex justify-end">
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="px-0 text-sm"
+                      onClick={() => setShowResetForm(true)}
+                    >
+                      Forgot Password?
+                    </Button>
+                  </div>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? "Signing in..." : "Sign In"}
+                  </Button>
+                </form>
+              ) : (
+                <form onSubmit={handleResetPassword} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="resetEmail">Email</Label>
+                    <Input
+                      id="resetEmail"
+                      name="resetEmail"
+                      type="email"
+                      placeholder="your.email@example.com"
+                      required
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => setShowResetForm(false)}
+                    >
+                      Back
+                    </Button>
+                    <Button type="submit" className="flex-1" disabled={isLoading}>
+                      {isLoading ? "Sending..." : "Send Reset Link"}
+                    </Button>
+                  </div>
+                </form>
+              )}
             </TabsContent>
             
             <TabsContent value="signup">
@@ -251,24 +289,6 @@ export default function Auth() {
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? "Creating account..." : "Sign Up"}
-                </Button>
-              </form>
-            </TabsContent>
-            
-            <TabsContent value="reset">
-              <form onSubmit={handleResetPassword} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="resetEmail">Email</Label>
-                  <Input
-                    id="resetEmail"
-                    name="resetEmail"
-                    type="email"
-                    placeholder="your.email@example.com"
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Sending reset link..." : "Send Reset Link"}
                 </Button>
               </form>
             </TabsContent>
