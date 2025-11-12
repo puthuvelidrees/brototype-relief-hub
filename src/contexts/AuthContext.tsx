@@ -84,7 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signUp = async (email: string, password: string, metadata: any) => {
     const redirectUrl = `${window.location.origin}/`;
     
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -93,8 +93,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       },
     });
     
-    if (!error) {
-      navigate("/");
+    if (!error && data.user) {
+      // Wait a bit for triggers to complete
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Check if user is admin before redirecting
+      const { data: roleData } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", data.user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+      
+      // Redirect based on role
+      if (roleData) {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
     }
     
     return { error };
