@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useNavigate } from "react-router-dom";
 import ComplaintForm from "@/components/ComplaintForm";
 import Navbar from "@/components/Navbar";
@@ -8,6 +9,7 @@ import { Phone } from "lucide-react";
 
 export default function StudentPortal() {
   const { user, loading } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -38,10 +40,10 @@ export default function StudentPortal() {
         <div className="max-w-3xl mx-auto space-y-6">
           <div className="text-center space-y-2">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Welcome to Brototype
+              {t.welcomeTitle}
             </h1>
             <p className="text-muted-foreground">
-              We're here to help. Submit your complaint and we'll get back to you soon.
+              {t.welcomeSubtitle}
             </p>
           </div>
 

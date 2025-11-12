@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +25,7 @@ export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const [showResetForm, setShowResetForm] = useState(false);
   const { signUp, signIn, resetPassword } = useAuth();
+  const { t } = useLanguage();
   const { toast } = useToast();
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -167,22 +169,22 @@ export default function Auth() {
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Brototype Complaints
+            {t.appTitle}
           </CardTitle>
-          <CardDescription>Welcome to the student complaint portal</CardDescription>
+          <CardDescription>{t.welcomeSubtitle}</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              <TabsTrigger value="signin">{t.signIn}</TabsTrigger>
+              <TabsTrigger value="signup">{t.signUp}</TabsTrigger>
             </TabsList>
             
             <TabsContent value="signin">
               {!showResetForm ? (
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signinEmail">Email</Label>
+                    <Label htmlFor="signinEmail">{t.email}</Label>
                     <Input
                       id="signinEmail"
                       name="signinEmail"
@@ -192,7 +194,7 @@ export default function Auth() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signinPassword">Password</Label>
+                    <Label htmlFor="signinPassword">{t.password}</Label>
                     <Input
                       id="signinPassword"
                       name="signinPassword"
@@ -208,17 +210,17 @@ export default function Auth() {
                       className="px-0 text-sm"
                       onClick={() => setShowResetForm(true)}
                     >
-                      Forgot Password?
+                      {t.forgotPassword}
                     </Button>
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Signing in..." : "Sign In"}
+                    {isLoading ? t.loading : t.signIn}
                   </Button>
                 </form>
               ) : (
                 <form onSubmit={handleResetPassword} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="resetEmail">Email</Label>
+                    <Label htmlFor="resetEmail">{t.email}</Label>
                     <Input
                       id="resetEmail"
                       name="resetEmail"
@@ -234,10 +236,10 @@ export default function Auth() {
                       className="flex-1"
                       onClick={() => setShowResetForm(false)}
                     >
-                      Back
+                      {t.backToSignIn}
                     </Button>
                     <Button type="submit" className="flex-1" disabled={isLoading}>
-                      {isLoading ? "Sending..." : "Send Reset Link"}
+                      {isLoading ? t.loading : t.sendResetLink}
                     </Button>
                   </div>
                 </form>
@@ -247,7 +249,7 @@ export default function Auth() {
             <TabsContent value="signup">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="fullName">Full Name</Label>
+                  <Label htmlFor="fullName">{t.fullName}</Label>
                   <Input
                     id="fullName"
                     name="fullName"
@@ -257,7 +259,7 @@ export default function Auth() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="mobile">Mobile Number</Label>
+                  <Label htmlFor="mobile">{t.mobileNumber}</Label>
                   <Input
                     id="mobile"
                     name="mobile"
@@ -268,7 +270,7 @@ export default function Auth() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signupEmail">Email</Label>
+                  <Label htmlFor="signupEmail">{t.email}</Label>
                   <Input
                     id="signupEmail"
                     name="signupEmail"
@@ -278,7 +280,7 @@ export default function Auth() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signupPassword">Password</Label>
+                  <Label htmlFor="signupPassword">{t.password}</Label>
                   <Input
                     id="signupPassword"
                     name="signupPassword"
@@ -288,7 +290,7 @@ export default function Auth() {
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Creating account..." : "Sign Up"}
+                  {isLoading ? t.loading : t.signUp}
                 </Button>
               </form>
             </TabsContent>

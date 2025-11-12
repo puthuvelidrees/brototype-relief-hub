@@ -1,12 +1,15 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
-import { Moon, Sun, LogOut, Shield, User } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Moon, Sun, LogOut, Shield, User, Languages } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 export default function Navbar() {
   const { user, isAdmin, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { language, setLanguage, t } = useLanguage();
   const location = useLocation();
 
   return (
@@ -17,31 +20,43 @@ export default function Navbar() {
             <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold">
               B
             </div>
-            <span className="font-bold text-xl hidden sm:inline">Brototype Complaints</span>
+            <span className="font-bold text-xl hidden sm:inline">{t.appTitle}</span>
           </Link>
 
           <div className="flex items-center gap-2">
             {user && (
               <>
-                <Button asChild variant="ghost" size="sm">
+                <Button asChild variant="ghost" size="sm" className="hidden sm:flex">
                   <Link to="/">
                     <User className="h-4 w-4 mr-2" />
-                    Submit
+                    {t.submit}
                   </Link>
                 </Button>
-                <Button asChild variant="ghost" size="sm">
-                  <Link to="/my-complaints">My Complaints</Link>
+                <Button asChild variant="ghost" size="sm" className="hidden sm:flex">
+                  <Link to="/my-complaints">{t.myComplaints}</Link>
                 </Button>
                 {isAdmin && (
-                  <Button asChild variant="ghost" size="sm">
+                  <Button asChild variant="ghost" size="sm" className="hidden sm:flex">
                     <Link to="/admin">
                       <Shield className="h-4 w-4 mr-2" />
-                      Admin
+                      {t.admin}
                     </Link>
                   </Button>
                 )}
               </>
             )}
+
+            <Select value={language} onValueChange={(value) => setLanguage(value as any)}>
+              <SelectTrigger className="w-[100px] h-9">
+                <Languages className="h-4 w-4 mr-2" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="en">English</SelectItem>
+                <SelectItem value="hi">हिन्दी</SelectItem>
+                <SelectItem value="ml">മലയാളം</SelectItem>
+              </SelectContent>
+            </Select>
 
             <Button variant="ghost" size="icon" onClick={toggleTheme}>
               {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}

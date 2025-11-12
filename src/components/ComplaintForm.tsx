@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +26,7 @@ interface Location {
 
 export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
@@ -133,18 +135,18 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Submit a Complaint</CardTitle>
-        <CardDescription>Fill in the details below to register your complaint</CardDescription>
+        <CardTitle>{t.submitComplaint}</CardTitle>
+        <CardDescription>{t.welcomeSubtitle}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
+              <Label htmlFor="name">{t.fullName}</Label>
               <Input id="name" name="name" placeholder="Your name" required />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="mobile">Mobile Number</Label>
+              <Label htmlFor="mobile">{t.mobileNumber}</Label>
               <Input id="mobile" name="mobile" type="tel" placeholder="9876543210" maxLength={10} required />
             </div>
           </div>
@@ -166,7 +168,7 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t.description}</Label>
             <Textarea
               id="description"
               name="description"
@@ -206,7 +208,7 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
           </div>
 
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Submitting..." : "Submit Complaint"}
+            {isLoading ? t.loading : t.submitComplaint}
           </Button>
         </form>
       </CardContent>
