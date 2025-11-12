@@ -17,6 +17,7 @@ const complaintSchema = z.object({
   mobile: z.string().trim().regex(/^\d{10}$/, "Mobile must be 10 digits"),
   locationId: z.string().uuid("Please select a location"),
   domainId: z.string().uuid("Please select a domain"),
+  categoryId: z.string().uuid("Please select a category"),
   description: z.string().trim().min(10, "Description must be at least 10 characters").max(1000),
 });
 
@@ -30,6 +31,12 @@ interface Domain {
   name: string;
 }
 
+interface Category {
+  id: string;
+  name: string;
+  icon_name: string;
+}
+
 export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) {
   const { user } = useAuth();
   const { t } = useLanguage();
@@ -38,15 +45,18 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
   const [file, setFile] = useState<File | null>(null);
   const [locations, setLocations] = useState<Location[]>([]);
   const [domains, setDomains] = useState<Domain[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
-      const [locationsRes, domainsRes] = await Promise.all([
+      const [locationsRes, domainsRes, categoriesRes] = await Promise.all([
         supabase.from("locations").select("*").order("name"),
         supabase.from("domains").select("*").order("name"),
+        supabase.from("categories").select("*").order("name"),
       ]);
       if (locationsRes.data) setLocations(locationsRes.data);
       if (domainsRes.data) setDomains(domainsRes.data);
+      if (categoriesRes.data) setCategories(categoriesRes.data);
     };
     fetchData();
   }, []);
@@ -77,6 +87,7 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
       mobile: formData.get("mobile") as string,
       locationId: formData.get("location") as string,
       domainId: formData.get("domain") as string,
+      categoryId: formData.get("category") as string,
       description: formData.get("description") as string,
     };
 
@@ -111,6 +122,7 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
         mobile: data.mobile,
         location_id: data.locationId,
         domain_id: data.domainId,
+        category_id: data.categoryId,
         description: data.description,
         file_url: fileUrl,
         file_type: fileType,
@@ -190,6 +202,22 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
                 {domains.map((domain) => (
                   <SelectItem key={domain.id} value={domain.id}>
                     {domain.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="category">Category</Label>
+            <Select name="category" required>
+              <SelectTrigger className="bg-background">
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent className="bg-popover z-50">
+                {categories.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name}
                   </SelectItem>
                 ))}
               </SelectContent>

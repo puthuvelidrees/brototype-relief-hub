@@ -7,8 +7,12 @@ import Navbar from "@/components/Navbar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { FileText, ExternalLink, Calendar, MapPin } from "lucide-react";
+import { FileText, ExternalLink, Calendar, MapPin, Building2, GraduationCap, Home, Bus, BookOpen, Trophy, Utensils, Laptop, Heart, MoreHorizontal } from "lucide-react";
 import { format } from "date-fns";
+
+const iconMap: Record<string, any> = {
+  Building2, GraduationCap, Home, Bus, BookOpen, Trophy, Utensils, Laptop, Heart, MoreHorizontal
+};
 
 interface Complaint {
   id: string;
@@ -22,6 +26,7 @@ interface Complaint {
   created_at: string;
   locations: { name: string };
   domains: { name: string };
+  categories: { name: string; icon_name: string } | null;
 }
 
 export default function MyComplaints() {
@@ -51,7 +56,8 @@ export default function MyComplaints() {
       .select(`
         *,
         locations (name),
-        domains (name)
+        domains (name),
+        categories (name, icon_name)
       `)
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
@@ -119,14 +125,14 @@ export default function MyComplaints() {
                 <Card key={complaint.id} className="hover:shadow-md transition-shadow">
                   <CardHeader>
                     <div className="flex items-start justify-between">
-                      <div>
+                      <div className="flex-1">
                         <CardTitle className="flex items-center gap-2">
                           Ticket #{complaint.ticket_id}
                           <Badge className={getStatusColor(complaint.status)}>
                             {getStatusText(complaint.status).toUpperCase()}
                           </Badge>
                         </CardTitle>
-                        <CardDescription className="mt-2 flex items-center gap-4">
+                        <CardDescription className="mt-2 flex flex-wrap items-center gap-4">
                           <span className="flex items-center gap-1">
                             <Calendar className="h-4 w-4" />
                             {format(new Date(complaint.created_at), "PPP")}
@@ -142,6 +148,15 @@ export default function MyComplaints() {
                           )}
                         </CardDescription>
                       </div>
+                      {complaint.categories && (() => {
+                        const Icon = iconMap[complaint.categories.icon_name] || MoreHorizontal;
+                        return (
+                          <div className="flex flex-col items-center gap-1 p-2 rounded-lg bg-muted/50">
+                            <Icon className="h-5 w-5 text-primary" />
+                            <span className="text-xs font-medium">{complaint.categories.name}</span>
+                          </div>
+                        );
+                      })()}
                     </div>
                   </CardHeader>
                   <CardContent>

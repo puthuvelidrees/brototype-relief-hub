@@ -9,8 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Search, ExternalLink, Trash2, CheckCircle, Calendar, MapPin, Phone, User } from "lucide-react";
+import { Search, ExternalLink, Trash2, CheckCircle, Calendar, MapPin, Phone, User, Building2, GraduationCap, Home, Bus, BookOpen, Trophy, Utensils, Laptop, Heart, MoreHorizontal, Filter } from "lucide-react";
 import { format } from "date-fns";
+
+const iconMap: Record<string, any> = {
+  Building2, GraduationCap, Home, Bus, BookOpen, Trophy, Utensils, Laptop, Heart, MoreHorizontal
+};
 
 interface Complaint {
   id: string;
@@ -23,6 +27,13 @@ interface Complaint {
   created_at: string;
   locations: { name: string };
   domains: { name: string };
+  categories: { name: string; icon_name: string } | null;
+}
+
+interface Category {
+  id: string;
+  name: string;
+  icon_name: string;
 }
 
 export default function AdminDashboard() {
@@ -32,6 +43,8 @@ export default function AdminDashboard() {
   const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [filteredComplaints, setFilteredComplaints] = useState<Complaint[]>([]);
   const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -44,6 +57,14 @@ export default function AdminDashboard() {
       });
     }
   }, [user, isAdmin, loading, navigate]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const { data } = await supabase.from("categories").select("*").order("name");
+      if (data) setCategories(data);
+    };
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     if (user && isAdmin) {
@@ -68,20 +89,28 @@ export default function AdminDashboard() {
   }, [user, isAdmin]);
 
   useEffect(() => {
+    let filtered = complaints;
+
+    // Filter by search
     if (search) {
-      const filtered = complaints.filter(
+      filtered = filtered.filter(
         (c) =>
           c.ticket_id.toLowerCase().includes(search.toLowerCase()) ||
           c.student_name.toLowerCase().includes(search.toLowerCase()) ||
           c.mobile.includes(search) ||
           c.locations.name.toLowerCase().includes(search.toLowerCase()) ||
-          (c.domains && c.domains.name.toLowerCase().includes(search.toLowerCase()))
+          (c.domains && c.domains.name.toLowerCase().includes(search.toLowerCase())) ||
+          (c.categories && c.categories.name.toLowerCase().includes(search.toLowerCase()))
       );
-      setFilteredComplaints(filtered);
-    } else {
-      setFilteredComplaints(complaints);
     }
-  }, [search, complaints]);
+
+    // Filter by category
+    if (selectedCategory !== "all") {
+      filtered = filtered.filter((c) => c.categories?.name === selectedCategory);
+    }
+
+    setFilteredComplaints(filtered);
+  }, [search, selectedCategory, complaints]);
 
   const fetchComplaints = async () => {
     const { data, error } = await supabase
@@ -89,7 +118,8 @@ export default function AdminDashboard() {
       .select(`
         *,
         locations (name),
-        domains (name)
+        domains (name),
+        categories (name, icon_name)
       `)
       .order("created_at", { ascending: false });
 
@@ -204,14 +234,32 @@ export default function AdminDashboard() {
 
           <Card>
             <CardHeader>
-              <div className="flex items-center gap-2">
-                <Search className="h-5 w-5 text-muted-foreground" />
-                <Input
-                  placeholder="Search by ticket, name, mobile, location, or domain..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="flex-1"
-                />
+              <div className="flex flex-col gap-4 sm:flex-row">
+                <div className="flex items-center gap-2 flex-1">
+                  <Search className="h-5 w-5 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by ticket, name, mobile, location, domain, or category..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="flex-1"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Filter className="h-5 w-5 text-muted-foreground" />
+                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                    <SelectTrigger className="w-[180px] bg-background">
+                      <SelectValue placeholder="All Categories" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-popover z-50">
+                      <SelectItem value="all">All Categories</SelectItem>
+                      {categories.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.name}>
+                          {cat.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </CardHeader>
           </Card>
@@ -222,7 +270,7 @@ export default function AdminDashboard() {
                 <CardContent className="pt-6">
                   <div className="space-y-4">
                     <div className="flex items-start justify-between">
-                      <div className="space-y-1">
+                      <div className="space-y-1 flex-1">
                         <div className="flex items-center gap-2">
                           <h3 className="font-semibold">#{complaint.ticket_id}</h3>
                           <Badge
@@ -237,7 +285,7 @@ export default function AdminDashboard() {
                             {complaint.status.replace("_", " ").toUpperCase()}
                           </Badge>
                         </div>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <User className="h-4 w-4" />
                             {complaint.student_name}
@@ -261,6 +309,15 @@ export default function AdminDashboard() {
                           </span>
                         </div>
                       </div>
+                      {complaint.categories && (() => {
+                        const Icon = iconMap[complaint.categories.icon_name] || MoreHorizontal;
+                        return (
+                          <div className="flex flex-col items-center gap-1 p-2 rounded-lg bg-muted/50">
+                            <Icon className="h-6 w-6 text-primary" />
+                            <span className="text-xs font-medium">{complaint.categories.name}</span>
+                          </div>
+                        );
+                      })()}
                     </div>
 
                     <p className="text-sm">{complaint.description}</p>

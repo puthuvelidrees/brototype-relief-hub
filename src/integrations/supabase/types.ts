@@ -14,8 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      categories: {
+        Row: {
+          created_at: string | null
+          icon_name: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          icon_name: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          icon_name?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       complaints: {
         Row: {
+          category_id: string | null
           created_at: string | null
           description: string
           domain_id: string | null
@@ -32,6 +54,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          category_id?: string | null
           created_at?: string | null
           description: string
           domain_id?: string | null
@@ -48,6 +71,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          category_id?: string | null
           created_at?: string | null
           description?: string
           domain_id?: string | null
@@ -64,6 +88,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "complaints_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "complaints_domain_id_fkey"
             columns: ["domain_id"]
