@@ -16,10 +16,16 @@ const complaintSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters").max(100),
   mobile: z.string().trim().regex(/^\d{10}$/, "Mobile must be 10 digits"),
   locationId: z.string().uuid("Please select a location"),
+  domainId: z.string().uuid("Please select a domain"),
   description: z.string().trim().min(10, "Description must be at least 10 characters").max(1000),
 });
 
 interface Location {
+  id: string;
+  name: string;
+}
+
+interface Domain {
   id: string;
   name: string;
 }
@@ -31,13 +37,18 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
   const [isLoading, setIsLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [locations, setLocations] = useState<Location[]>([]);
+  const [domains, setDomains] = useState<Domain[]>([]);
 
   useEffect(() => {
-    const fetchLocations = async () => {
-      const { data } = await supabase.from("locations").select("*").order("name");
-      if (data) setLocations(data);
+    const fetchData = async () => {
+      const [locationsRes, domainsRes] = await Promise.all([
+        supabase.from("locations").select("*").order("name"),
+        supabase.from("domains").select("*").order("name"),
+      ]);
+      if (locationsRes.data) setLocations(locationsRes.data);
+      if (domainsRes.data) setDomains(domainsRes.data);
     };
-    fetchLocations();
+    fetchData();
   }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,6 +76,7 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
       name: formData.get("name") as string,
       mobile: formData.get("mobile") as string,
       locationId: formData.get("location") as string,
+      domainId: formData.get("domain") as string,
       description: formData.get("description") as string,
     };
 
@@ -98,6 +110,7 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
         student_name: data.name,
         mobile: data.mobile,
         location_id: data.locationId,
+        domain_id: data.domainId,
         description: data.description,
         file_url: fileUrl,
         file_type: fileType,
@@ -152,15 +165,31 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="location">Location</Label>
+            <Label htmlFor="location">{t.location}</Label>
             <Select name="location" required>
               <SelectTrigger className="bg-background">
-                <SelectValue placeholder="Select your location" />
+                <SelectValue placeholder={t.selectLocation} />
               </SelectTrigger>
               <SelectContent className="bg-popover z-50">
                 {locations.map((loc) => (
                   <SelectItem key={loc.id} value={loc.id}>
                     {loc.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="domain">{t.domain}</Label>
+            <Select name="domain" required>
+              <SelectTrigger className="bg-background">
+                <SelectValue placeholder={t.selectDomain} />
+              </SelectTrigger>
+              <SelectContent className="bg-popover z-50">
+                {domains.map((domain) => (
+                  <SelectItem key={domain.id} value={domain.id}>
+                    {domain.name}
                   </SelectItem>
                 ))}
               </SelectContent>

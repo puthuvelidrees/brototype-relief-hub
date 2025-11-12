@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           created_at: string | null
           description: string
+          domain_id: string | null
           file_type: string | null
           file_url: string | null
           id: string
@@ -33,6 +34,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           description: string
+          domain_id?: string | null
           file_type?: string | null
           file_url?: string | null
           id?: string
@@ -48,6 +50,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           description?: string
+          domain_id?: string | null
           file_type?: string | null
           file_url?: string | null
           id?: string
@@ -62,6 +65,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "complaints_domain_id_fkey"
+            columns: ["domain_id"]
+            isOneToOne: false
+            referencedRelation: "domains"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "complaints_location_id_fkey"
             columns: ["location_id"]
             isOneToOne: false
@@ -69,6 +79,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      domains: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
       }
       locations: {
         Row: {

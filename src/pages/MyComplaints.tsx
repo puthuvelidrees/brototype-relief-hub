@@ -21,6 +21,7 @@ interface Complaint {
   file_type: string | null;
   created_at: string;
   locations: { name: string };
+  domains: { name: string };
 }
 
 export default function MyComplaints() {
@@ -49,7 +50,8 @@ export default function MyComplaints() {
       .from("complaints")
       .select(`
         *,
-        locations (name)
+        locations (name),
+        domains (name)
       `)
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
@@ -133,6 +135,11 @@ export default function MyComplaints() {
                             <MapPin className="h-4 w-4" />
                             {complaint.locations.name}
                           </span>
+                          {complaint.domains && (
+                            <Badge variant="outline">
+                              {complaint.domains.name}
+                            </Badge>
+                          )}
                         </CardDescription>
                       </div>
                     </div>

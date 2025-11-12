@@ -22,6 +22,7 @@ interface Complaint {
   file_url: string | null;
   created_at: string;
   locations: { name: string };
+  domains: { name: string };
 }
 
 export default function AdminDashboard() {
@@ -73,7 +74,8 @@ export default function AdminDashboard() {
           c.ticket_id.toLowerCase().includes(search.toLowerCase()) ||
           c.student_name.toLowerCase().includes(search.toLowerCase()) ||
           c.mobile.includes(search) ||
-          c.locations.name.toLowerCase().includes(search.toLowerCase())
+          c.locations.name.toLowerCase().includes(search.toLowerCase()) ||
+          (c.domains && c.domains.name.toLowerCase().includes(search.toLowerCase()))
       );
       setFilteredComplaints(filtered);
     } else {
@@ -86,7 +88,8 @@ export default function AdminDashboard() {
       .from("complaints")
       .select(`
         *,
-        locations (name)
+        locations (name),
+        domains (name)
       `)
       .order("created_at", { ascending: false });
 
@@ -204,7 +207,7 @@ export default function AdminDashboard() {
               <div className="flex items-center gap-2">
                 <Search className="h-5 w-5 text-muted-foreground" />
                 <Input
-                  placeholder="Search by ticket, name, mobile, or location..."
+                  placeholder="Search by ticket, name, mobile, location, or domain..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="flex-1"
@@ -247,6 +250,11 @@ export default function AdminDashboard() {
                             <MapPin className="h-4 w-4" />
                             {complaint.locations.name}
                           </span>
+                          {complaint.domains && (
+                            <Badge variant="outline">
+                              {complaint.domains.name}
+                            </Badge>
+                          )}
                           <span className="flex items-center gap-1">
                             <Calendar className="h-4 w-4" />
                             {format(new Date(complaint.created_at), "PPP")}

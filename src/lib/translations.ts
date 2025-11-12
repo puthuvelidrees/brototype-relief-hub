@@ -25,6 +25,10 @@ export type TranslationKeys = {
   welcomeSubtitle: string;
   submitComplaint: string;
   complaintType: string;
+  location: string;
+  selectLocation: string;
+  domain: string;
+  selectDomain: string;
   description: string;
   submitButton: string;
   
@@ -83,6 +87,10 @@ export const translations: Record<Language, TranslationKeys> = {
     welcomeSubtitle: 'Submit your complaints and track their status',
     submitComplaint: 'Submit a Complaint',
     complaintType: 'Complaint Type',
+    location: 'Location',
+    selectLocation: 'Select your location',
+    domain: 'Domain',
+    selectDomain: 'Select domain',
     description: 'Description',
     submitButton: 'Submit Complaint',
     
@@ -139,6 +147,10 @@ export const translations: Record<Language, TranslationKeys> = {
     welcomeSubtitle: 'अपनी शिकायतें जमा करें और उनकी स्थिति ट्रैक करें',
     submitComplaint: 'शिकायत दर्ज करें',
     complaintType: 'शिकायत का प्रकार',
+    location: 'स्थान',
+    selectLocation: 'अपना स्थान चुनें',
+    domain: 'डोमेन',
+    selectDomain: 'डोमेन चुनें',
     description: 'विवरण',
     submitButton: 'शिकायत जमा करें',
     
@@ -195,6 +207,10 @@ export const translations: Record<Language, TranslationKeys> = {
     welcomeSubtitle: 'നിങ്ങളുടെ പരാതികൾ സമർപ്പിക്കുകയും അവയുടെ നില ട്രാക്ക് ചെയ്യുകയും ചെയ്യുക',
     submitComplaint: 'പരാതി സമർപ്പിക്കുക',
     complaintType: 'പരാതിയുടെ തരം',
+    location: 'ലൊക്കേഷൻ',
+    selectLocation: 'നിങ്ങളുടെ ലൊക്കേഷൻ തിരഞ്ഞെടുക്കുക',
+    domain: 'ഡൊമെയ്ൻ',
+    selectDomain: 'ഡൊമെയ്ൻ തിരഞ്ഞെടുക്കുക',
     description: 'വിവരണം',
     submitButton: 'പരാതി സമർപ്പിക്കുക',
     
