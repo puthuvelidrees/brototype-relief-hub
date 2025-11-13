@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { Settings, Bell, Mail, Clock, Save, Loader2, Activity, User, FileText } from "lucide-react";
+import { Settings, Bell, Mail, Clock, Save, Loader2, Activity, User, FileText, Volume2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 
@@ -36,6 +36,12 @@ export default function AdminSettings() {
   const [statusChangeNotification, setStatusChangeNotification] = useState(true);
   const [dailyDigest, setDailyDigest] = useState(false);
   const [notificationEmail, setNotificationEmail] = useState("");
+  
+  // Real-time Notification Preferences
+  const [realtimeNotifications, setRealtimeNotifications] = useState(true);
+  const [realtimeNewComplaint, setRealtimeNewComplaint] = useState(true);
+  const [realtimeStatusChange, setRealtimeStatusChange] = useState(true);
+  const [notificationSound, setNotificationSound] = useState(true);
   
   // Activity Logs
   const [activityLogs, setActivityLogs] = useState<any[]>([]);
@@ -138,6 +144,10 @@ export default function AdminSettings() {
         setNewComplaintNotification(data.new_complaint_notification);
         setStatusChangeNotification(data.status_change_notification);
         setDailyDigest(data.daily_digest);
+        setRealtimeNotifications(data.realtime_notifications ?? true);
+        setRealtimeNewComplaint(data.realtime_new_complaint ?? true);
+        setRealtimeStatusChange(data.realtime_status_change ?? true);
+        setNotificationSound(data.notification_sound ?? true);
         if (data.notification_email) {
           setNotificationEmail(data.notification_email);
         }
@@ -169,6 +179,10 @@ export default function AdminSettings() {
         status_change_notification: statusChangeNotification,
         daily_digest: dailyDigest,
         notification_email: notificationEmail,
+        realtime_notifications: realtimeNotifications,
+        realtime_new_complaint: realtimeNewComplaint,
+        realtime_status_change: realtimeStatusChange,
+        notification_sound: notificationSound,
       };
 
       const { error } = await supabase
@@ -403,6 +417,91 @@ export default function AdminSettings() {
                   checked={dailyDigest}
                   onCheckedChange={setDailyDigest}
                   disabled={!emailNotifications}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Real-time Notification Preferences */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Bell className="h-5 w-5" />
+                Real-time Notifications
+              </CardTitle>
+              <CardDescription>
+                Configure in-app toast notifications and alerts
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="realtime-enabled" className="flex items-center gap-2">
+                    <Bell className="h-4 w-4" />
+                    Enable real-time notifications
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Master toggle for all in-app notification alerts
+                  </p>
+                </div>
+                <Switch
+                  id="realtime-enabled"
+                  checked={realtimeNotifications}
+                  onCheckedChange={setRealtimeNotifications}
+                />
+              </div>
+
+              <Separator />
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="realtime-new-complaint">New complaint alerts</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Show toast notification when a new complaint is submitted
+                  </p>
+                </div>
+                <Switch
+                  id="realtime-new-complaint"
+                  checked={realtimeNewComplaint}
+                  onCheckedChange={setRealtimeNewComplaint}
+                  disabled={!realtimeNotifications}
+                />
+              </div>
+
+              <Separator />
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="realtime-status-change">Status change alerts</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Show toast notification when complaint status changes
+                  </p>
+                </div>
+                <Switch
+                  id="realtime-status-change"
+                  checked={realtimeStatusChange}
+                  onCheckedChange={setRealtimeStatusChange}
+                  disabled={!realtimeNotifications}
+                />
+              </div>
+
+              <Separator />
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="notification-sound" className="flex items-center gap-2">
+                    <Volume2 className="h-4 w-4" />
+                    Notification sound
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Play a sound effect with notifications
+                  </p>
+                </div>
+                <Switch
+                  id="notification-sound"
+                  checked={notificationSound}
+                  onCheckedChange={setNotificationSound}
+                  disabled={!realtimeNotifications}
                 />
               </div>
             </CardContent>
