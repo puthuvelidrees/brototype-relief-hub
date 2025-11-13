@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,9 +25,20 @@ const signInSchema = z.object({
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const [showResetForm, setShowResetForm] = useState(false);
-  const { signUp, signIn, resetPassword, updatePassword, isPasswordRecovery } = useAuth();
+  const { user, isAdmin, loading, signUp, signIn, resetPassword, updatePassword, isPasswordRecovery } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && user && !isPasswordRecovery) {
+      if (isAdmin) {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
+    }
+  }, [user, isAdmin, loading, isPasswordRecovery, navigate]);
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
