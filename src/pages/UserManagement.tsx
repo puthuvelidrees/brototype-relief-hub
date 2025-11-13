@@ -181,6 +181,20 @@ export default function UserManagement() {
             <p className="text-muted-foreground">Manage user roles and permissions</p>
           </div>
 
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Search className="h-5 w-5 text-muted-foreground" />
+                <Input
+                  placeholder="Search by name, email, or mobile..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="flex-1"
+                />
+              </div>
+            </CardHeader>
+          </Card>
+
           <div className="grid gap-4 md:grid-cols-3">
             <Card>
               <CardHeader className="pb-2">
@@ -207,20 +221,6 @@ export default function UserManagement() {
               </CardContent>
             </Card>
           </div>
-
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Search className="h-5 w-5 text-muted-foreground" />
-                <Input
-                  placeholder="Search by name, email, or mobile..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="flex-1"
-                />
-              </div>
-            </CardHeader>
-          </Card>
 
           <div className="space-y-4">
             {filteredUsers.map((userProfile) => (
