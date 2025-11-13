@@ -11,7 +11,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { Settings, Bell, Mail, Clock, Save, Loader2 } from "lucide-react";
+import { Settings, Bell, Mail, Clock, Save, Loader2, Activity, User, FileText } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
 
 export default function AdminSettings() {
   const { user, isAdmin, loading } = useAuth();
@@ -32,6 +34,10 @@ export default function AdminSettings() {
   const [statusChangeNotification, setStatusChangeNotification] = useState(true);
   const [dailyDigest, setDailyDigest] = useState(false);
   const [notificationEmail, setNotificationEmail] = useState("");
+  
+  // Activity Logs
+  const [activityLogs, setActivityLogs] = useState<any[]>([]);
+  const [logsLoading, setLogsLoading] = useState(true);
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {
@@ -48,8 +54,44 @@ export default function AdminSettings() {
     if (user) {
       setNotificationEmail(user.email || "");
       loadSettings();
+      loadActivityLogs();
     }
   }, [user]);
+
+  const loadActivityLogs = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("activity_logs")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(20);
+
+      if (error) throw error;
+      setActivityLogs(data || []);
+    } catch (error: any) {
+      console.error("Error loading activity logs:", error);
+    } finally {
+      setLogsLoading(false);
+    }
+  };
+
+  const logActivity = async (actionType: string, description: string, entityType?: string, entityId?: string) => {
+    if (!user) return;
+
+    try {
+      await supabase
+        .from("activity_logs")
+        .insert({
+          user_id: user.id,
+          action_type: actionType,
+          action_description: description,
+          entity_type: entityType,
+          entity_id: entityId,
+        });
+    } catch (error) {
+      console.error("Error logging activity:", error);
+    }
+  };
 
   const loadSettings = async () => {
     if (!user) return;
@@ -113,10 +155,19 @@ export default function AdminSettings() {
 
       if (error) throw error;
 
+      await logActivity(
+        "settings_update",
+        "Updated admin settings and preferences",
+        "admin_settings",
+        user.id
+      );
+
       toast({
         title: "Settings saved",
         description: "Your preferences have been updated successfully.",
       });
+      
+      loadActivityLogs();
     } catch (error: any) {
       toast({
         title: "Error saving settings",
@@ -332,6 +383,69 @@ export default function AdminSettings() {
                   disabled={!emailNotifications}
                 />
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Activity Log Section */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Activity className="h-5 w-5" />
+                <CardTitle>Activity Log</CardTitle>
+              </div>
+              <CardDescription>
+                Recent admin actions and system events
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-[400px] pr-4">
+                {logsLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : activityLogs.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No activity logs yet
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {activityLogs.map((log) => (
+                      <div
+                        key={log.id}
+                        className="flex items-start gap-3 pb-4 border-b last:border-0"
+                      >
+                        <div className="mt-1">
+                          {log.action_type === "settings_update" && (
+                            <Settings className="h-4 w-4 text-muted-foreground" />
+                          )}
+                          {log.action_type === "user_action" && (
+                            <User className="h-4 w-4 text-muted-foreground" />
+                          )}
+                          {log.action_type === "complaint_action" && (
+                            <FileText className="h-4 w-4 text-muted-foreground" />
+                          )}
+                          {!["settings_update", "user_action", "complaint_action"].includes(log.action_type) && (
+                            <Activity className="h-4 w-4 text-muted-foreground" />
+                          )}
+                        </div>
+                        <div className="flex-1 space-y-1">
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm font-medium">
+                              {log.action_description}
+                            </p>
+                            <Badge variant="outline" className="text-xs">
+                              {log.action_type.replace("_", " ")}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(log.created_at).toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </ScrollArea>
             </CardContent>
           </Card>
 
