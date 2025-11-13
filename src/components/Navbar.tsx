@@ -3,7 +3,8 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Moon, Sun, LogOut, Shield, User, Languages, Users } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Moon, Sun, LogOut, Shield, User, Languages, Users, ChevronDown, FileText, Settings } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 export default function Navbar() {
@@ -40,30 +41,38 @@ export default function Navbar() {
                   </>
                 )}
                 {isAdmin && (
-                  <>
-                    <Button 
-                      asChild 
-                      variant={location.pathname === "/admin" ? "default" : "ghost"} 
-                      size="sm" 
-                      className="hidden sm:flex"
-                    >
-                      <Link to="/admin">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="default" size="sm" className="hidden sm:flex">
                         <Shield className="h-4 w-4 mr-2" />
-                        Admin Dashboard
-                      </Link>
-                    </Button>
-                    <Button 
-                      asChild 
-                      variant={location.pathname === "/admin/users" ? "default" : "ghost"} 
-                      size="sm" 
-                      className="hidden sm:flex"
-                    >
-                      <Link to="/admin/users">
-                        <Users className="h-4 w-4 mr-2" />
-                        Users
-                      </Link>
-                    </Button>
-                  </>
+                        Admin
+                        <ChevronDown className="h-4 w-4 ml-2" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56 bg-popover z-50" align="end">
+                      <DropdownMenuLabel>Admin Actions</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin" className="flex items-center cursor-pointer">
+                          <FileText className="h-4 w-4 mr-2" />
+                          View Complaints
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin/users" className="flex items-center cursor-pointer">
+                          <Users className="h-4 w-4 mr-2" />
+                          Manage Users
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin/settings" className="flex items-center cursor-pointer">
+                          <Settings className="h-4 w-4 mr-2" />
+                          Settings
+                        </Link>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 )}
               </>
             )}
