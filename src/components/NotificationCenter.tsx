@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Bell, Check, FileText, Settings as SettingsIcon, User as UserIcon, X } from "lucide-react";
+import { Bell, Check, FileText, Settings as SettingsIcon, User as UserIcon, X, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatDistanceToNow } from "date-fns";
 
 interface Notification {
@@ -29,8 +30,11 @@ interface Notification {
 export default function NotificationCenter() {
   const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [filteredNotifications, setFilteredNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
+  const [filterType, setFilterType] = useState<string>("all");
+  const [filterRead, setFilterRead] = useState<string>("all");
 
   useEffect(() => {
     if (!user) return;
@@ -76,7 +80,30 @@ export default function NotificationCenter() {
 
     setNotifications(data || []);
     setUnreadCount(data?.filter(n => !n.is_read).length || 0);
+    applyFilters(data || []);
   };
+
+  const applyFilters = (notificationList: Notification[]) => {
+    let filtered = notificationList;
+
+    // Filter by type
+    if (filterType !== "all") {
+      filtered = filtered.filter(n => n.type === filterType);
+    }
+
+    // Filter by read status
+    if (filterRead === "unread") {
+      filtered = filtered.filter(n => !n.is_read);
+    } else if (filterRead === "read") {
+      filtered = filtered.filter(n => n.is_read);
+    }
+
+    setFilteredNotifications(filtered);
+  };
+
+  useEffect(() => {
+    applyFilters(notifications);
+  }, [filterType, filterRead, notifications]);
 
   const markAsRead = async (notificationId: string) => {
     const { error } = await supabase
@@ -139,7 +166,7 @@ export default function NotificationCenter() {
       </DropdownMenuTrigger>
       <DropdownMenuContent 
         align="end" 
-        className="w-80 bg-background border shadow-lg z-50"
+        className="w-96 bg-background border shadow-lg z-50"
       >
         <DropdownMenuLabel className="flex items-center justify-between">
           <span>Notifications</span>
@@ -156,13 +183,46 @@ export default function NotificationCenter() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         
-        {notifications.length === 0 ? (
+        {/* Filters */}
+        <div className="px-2 py-3 space-y-3">
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+              <Filter className="h-3 w-3" />
+              Filter by Type
+            </label>
+            <Tabs value={filterType} onValueChange={setFilterType} className="w-full">
+              <TabsList className="grid w-full grid-cols-4 h-8">
+                <TabsTrigger value="all" className="text-xs">All</TabsTrigger>
+                <TabsTrigger value="complaint_action" className="text-xs">Complaints</TabsTrigger>
+                <TabsTrigger value="settings_update" className="text-xs">Settings</TabsTrigger>
+                <TabsTrigger value="user_action" className="text-xs">Users</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-muted-foreground">
+              Filter by Status
+            </label>
+            <Tabs value={filterRead} onValueChange={setFilterRead} className="w-full">
+              <TabsList className="grid w-full grid-cols-3 h-8">
+                <TabsTrigger value="all" className="text-xs">All</TabsTrigger>
+                <TabsTrigger value="unread" className="text-xs">Unread</TabsTrigger>
+                <TabsTrigger value="read" className="text-xs">Read</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+        </div>
+
+        <DropdownMenuSeparator />
+        
+        {filteredNotifications.length === 0 ? (
           <div className="py-8 text-center text-sm text-muted-foreground">
-            No notifications yet
+            {notifications.length === 0 ? "No notifications yet" : "No notifications match the filters"}
           </div>
         ) : (
-          <ScrollArea className="h-[400px]">
-            {notifications.map((notification) => (
+          <ScrollArea className="h-[350px]">
+            {filteredNotifications.map((notification) => (
               <DropdownMenuItem
                 key={notification.id}
                 className={`flex items-start gap-3 p-3 cursor-pointer ${
