@@ -8,15 +8,17 @@ import { Button } from "@/components/ui/button";
 import { Phone } from "lucide-react";
 
 export default function StudentPortal() {
-  const { user, loading } = useAuth();
+  const { user, isAdmin, loading } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!loading && !user) {
       navigate("/auth");
+    } else if (!loading && user && isAdmin) {
+      navigate("/admin");
     }
-  }, [user, loading, navigate]);
+  }, [user, isAdmin, loading, navigate]);
 
   if (loading) {
     return (
