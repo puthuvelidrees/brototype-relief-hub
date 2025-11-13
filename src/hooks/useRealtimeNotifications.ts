@@ -39,6 +39,26 @@ export function useRealtimeNotifications() {
     }
   };
 
+  const createNotification = async (title: string, message: string, type: string, entityType?: string, entityId?: string) => {
+    if (!user) return;
+
+    try {
+      await supabase
+        .from("notifications")
+        .insert({
+          user_id: user.id,
+          title,
+          message,
+          type,
+          entity_type: entityType,
+          entity_id: entityId,
+          is_read: false,
+        });
+    } catch (error) {
+      console.error("Error creating notification:", error);
+    }
+  };
+
   // Load notification preferences
   useEffect(() => {
     if (!user) return;
@@ -77,7 +97,7 @@ export function useRealtimeNotifications() {
           schema: 'public',
           table: 'complaints'
         },
-        (payload) => {
+        async (payload) => {
           const complaint = payload.new as any;
           
           // Check if new complaint notifications are enabled
@@ -93,6 +113,15 @@ export function useRealtimeNotifications() {
               playNotificationSound();
             }
           }
+
+          // Create notification record
+          await createNotification(
+            "New Complaint Submitted",
+            `${complaint.student_name} submitted a complaint (${complaint.ticket_id})`,
+            "complaint_action",
+            "complaint",
+            complaint.id
+          );
 
           // Log the activity
           logActivity(
@@ -110,7 +139,7 @@ export function useRealtimeNotifications() {
           schema: 'public',
           table: 'complaints'
         },
-        (payload) => {
+        async (payload) => {
           const oldComplaint = payload.old as any;
           const newComplaint = payload.new as any;
 
@@ -129,6 +158,15 @@ export function useRealtimeNotifications() {
                 playNotificationSound();
               }
             }
+
+            // Create notification record
+            await createNotification(
+              "Complaint Status Updated",
+              `Complaint ${newComplaint.ticket_id} status changed to ${newComplaint.status}`,
+              "complaint_action",
+              "complaint",
+              newComplaint.id
+            );
 
             // Log the activity
             logActivity(

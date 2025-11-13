@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Moon, Sun, LogOut, Shield, User, Languages, Users, ChevronDown, FileText, Settings } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import NotificationCenter from "@/components/NotificationCenter";
 
 export default function Navbar() {
   const { user, isAdmin, signOut } = useAuth();
@@ -76,6 +77,8 @@ export default function Navbar() {
                 )}
               </>
             )}
+
+            {user && <NotificationCenter />}
 
             <Select value={language} onValueChange={(value) => setLanguage(value as any)}>
               <SelectTrigger className="w-[100px] h-9">
