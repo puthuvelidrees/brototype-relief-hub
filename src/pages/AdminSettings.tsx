@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -10,12 +11,14 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { Settings, Bell, Mail, Clock, Save } from "lucide-react";
+import { Settings, Bell, Mail, Clock, Save, Loader2 } from "lucide-react";
 
 export default function AdminSettings() {
   const { user, isAdmin, loading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   
   // System Preferences
   const [autoAssignComplaints, setAutoAssignComplaints] = useState(false);
@@ -44,17 +47,88 @@ export default function AdminSettings() {
   useEffect(() => {
     if (user) {
       setNotificationEmail(user.email || "");
+      loadSettings();
     }
   }, [user]);
 
-  const handleSaveSettings = () => {
-    toast({
-      title: "Settings saved",
-      description: "Your preferences have been updated successfully.",
-    });
+  const loadSettings = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from("admin_settings")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (error && error.code !== "PGRST116") {
+        throw error;
+      }
+
+      if (data) {
+        setAutoAssignComplaints(data.auto_assign_complaints);
+        setRequireApproval(data.require_approval);
+        setMaxComplaintsPerDay(String(data.max_complaints_per_day));
+        setDefaultComplaintStatus(data.default_complaint_status);
+        setEmailNotifications(data.email_notifications);
+        setNewComplaintNotification(data.new_complaint_notification);
+        setStatusChangeNotification(data.status_change_notification);
+        setDailyDigest(data.daily_digest);
+        if (data.notification_email) {
+          setNotificationEmail(data.notification_email);
+        }
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error loading settings",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  if (loading) {
+  const handleSaveSettings = async () => {
+    if (!user) return;
+
+    setIsSaving(true);
+    try {
+      const settingsData = {
+        user_id: user.id,
+        auto_assign_complaints: autoAssignComplaints,
+        require_approval: requireApproval,
+        max_complaints_per_day: parseInt(maxComplaintsPerDay),
+        default_complaint_status: defaultComplaintStatus,
+        email_notifications: emailNotifications,
+        new_complaint_notification: newComplaintNotification,
+        status_change_notification: statusChangeNotification,
+        daily_digest: dailyDigest,
+        notification_email: notificationEmail,
+      };
+
+      const { error } = await supabase
+        .from("admin_settings")
+        .upsert(settingsData, { onConflict: "user_id" });
+
+      if (error) throw error;
+
+      toast({
+        title: "Settings saved",
+        description: "Your preferences have been updated successfully.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error saving settings",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (loading || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -263,9 +337,18 @@ export default function AdminSettings() {
 
           {/* Save Button */}
           <div className="flex justify-end">
-            <Button onClick={handleSaveSettings} size="lg">
-              <Save className="h-4 w-4 mr-2" />
-              Save Settings
+            <Button onClick={handleSaveSettings} size="lg" disabled={isSaving}>
+              {isSaving ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 mr-2" />
+                  Save Settings
+                </>
+              )}
             </Button>
           </div>
         </div>
