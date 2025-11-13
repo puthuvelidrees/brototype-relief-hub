@@ -37,6 +37,15 @@ interface Category {
   icon_name: string;
 }
 
+interface FieldErrors {
+  name?: string;
+  mobile?: string;
+  locationId?: string;
+  domainId?: string;
+  categoryId?: string;
+  description?: string;
+}
+
 export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) {
   const { user } = useAuth();
   const { t } = useLanguage();
@@ -46,6 +55,8 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
   const [locations, setLocations] = useState<Location[]>([]);
   const [domains, setDomains] = useState<Domain[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [errors, setErrors] = useState<FieldErrors>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -75,6 +86,47 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
       }
       setFile(selectedFile);
     }
+  };
+
+  const validateField = (name: string, value: string) => {
+    try {
+      switch (name) {
+        case "name":
+          complaintSchema.shape.name.parse(value);
+          break;
+        case "mobile":
+          complaintSchema.shape.mobile.parse(value);
+          break;
+        case "location":
+          complaintSchema.shape.locationId.parse(value);
+          break;
+        case "domain":
+          complaintSchema.shape.domainId.parse(value);
+          break;
+        case "category":
+          complaintSchema.shape.categoryId.parse(value);
+          break;
+        case "description":
+          complaintSchema.shape.description.parse(value);
+          break;
+      }
+      setErrors(prev => ({ ...prev, [name === "location" ? "locationId" : name === "domain" ? "domainId" : name === "category" ? "categoryId" : name]: undefined }));
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        setErrors(prev => ({ ...prev, [name === "location" ? "locationId" : name === "domain" ? "domainId" : name === "category" ? "categoryId" : name]: err.errors[0].message }));
+      }
+    }
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setTouched(prev => ({ ...prev, [name]: true }));
+    validateField(name, value);
+  };
+
+  const handleSelectChange = (name: string, value: string) => {
+    setTouched(prev => ({ ...prev, [name]: true }));
+    validateField(name, value);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -136,6 +188,8 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
       });
 
       setFile(null);
+      setErrors({});
+      setTouched({});
       e.currentTarget?.reset();
       onSuccess();
     } catch (err: any) {
@@ -168,18 +222,40 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="name">{t.fullName}</Label>
-              <Input id="name" name="name" placeholder="Your name" required />
+              <Input 
+                id="name" 
+                name="name" 
+                placeholder="Your name" 
+                onBlur={handleBlur}
+                className={touched.name && errors.name ? "border-destructive" : ""}
+                required 
+              />
+              {touched.name && errors.name && (
+                <p className="text-sm text-destructive">{errors.name}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="mobile">{t.mobileNumber}</Label>
-              <Input id="mobile" name="mobile" type="tel" placeholder="9876543210" maxLength={10} required />
+              <Input 
+                id="mobile" 
+                name="mobile" 
+                type="tel" 
+                placeholder="9876543210" 
+                maxLength={10}
+                onBlur={handleBlur}
+                className={touched.mobile && errors.mobile ? "border-destructive" : ""}
+                required 
+              />
+              {touched.mobile && errors.mobile && (
+                <p className="text-sm text-destructive">{errors.mobile}</p>
+              )}
             </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="location">{t.location}</Label>
-            <Select name="location" required>
-              <SelectTrigger className="bg-background">
+            <Select name="location" onValueChange={(value) => handleSelectChange("location", value)} required>
+              <SelectTrigger className={`bg-background ${touched.location && errors.locationId ? "border-destructive" : ""}`}>
                 <SelectValue placeholder={t.selectLocation} />
               </SelectTrigger>
               <SelectContent className="bg-popover z-50">
@@ -190,12 +266,15 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
                 ))}
               </SelectContent>
             </Select>
+            {touched.location && errors.locationId && (
+              <p className="text-sm text-destructive">{errors.locationId}</p>
+            )}
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="domain">{t.domain}</Label>
-            <Select name="domain" required>
-              <SelectTrigger className="bg-background">
+            <Select name="domain" onValueChange={(value) => handleSelectChange("domain", value)} required>
+              <SelectTrigger className={`bg-background ${touched.domain && errors.domainId ? "border-destructive" : ""}`}>
                 <SelectValue placeholder={t.selectDomain} />
               </SelectTrigger>
               <SelectContent className="bg-popover z-50">
@@ -206,12 +285,15 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
                 ))}
               </SelectContent>
             </Select>
+            {touched.domain && errors.domainId && (
+              <p className="text-sm text-destructive">{errors.domainId}</p>
+            )}
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="category">Category</Label>
-            <Select name="category" required>
-              <SelectTrigger className="bg-background">
+            <Select name="category" onValueChange={(value) => handleSelectChange("category", value)} required>
+              <SelectTrigger className={`bg-background ${touched.category && errors.categoryId ? "border-destructive" : ""}`}>
                 <SelectValue placeholder="Select a category" />
               </SelectTrigger>
               <SelectContent className="bg-popover z-50">
@@ -222,6 +304,9 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
                 ))}
               </SelectContent>
             </Select>
+            {touched.category && errors.categoryId && (
+              <p className="text-sm text-destructive">{errors.categoryId}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -232,8 +317,13 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
               placeholder="Describe your complaint in detail..."
               rows={4}
               maxLength={1000}
+              onBlur={handleBlur}
+              className={touched.description && errors.description ? "border-destructive" : ""}
               required
             />
+            {touched.description && errors.description && (
+              <p className="text-sm text-destructive">{errors.description}</p>
+            )}
           </div>
 
           <div className="space-y-2">
