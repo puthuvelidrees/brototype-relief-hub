@@ -1,12 +1,25 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+
+interface NotificationPreferences {
+  realtime_notifications: boolean;
+  realtime_new_complaint: boolean;
+  realtime_status_change: boolean;
+  notification_sound: boolean;
+}
 
 export function useRealtimeNotifications() {
   const { toast } = useToast();
   const { isAdmin, user } = useAuth();
   const channelRef = useRef<any>(null);
+  const [preferences, setPreferences] = useState<NotificationPreferences>({
+    realtime_notifications: true,
+    realtime_new_complaint: true,
+    realtime_status_change: true,
+    notification_sound: true,
+  });
 
   const logActivity = async (actionType: string, description: string, entityType?: string, entityId?: string) => {
     if (!user) return;
@@ -26,9 +39,33 @@ export function useRealtimeNotifications() {
     }
   };
 
+  // Load notification preferences
   useEffect(() => {
-    // Only set up realtime for admins
-    if (!isAdmin) return;
+    if (!user) return;
+
+    const loadPreferences = async () => {
+      const { data } = await supabase
+        .from("admin_settings")
+        .select("realtime_notifications, realtime_new_complaint, realtime_status_change, notification_sound")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (data) {
+        setPreferences({
+          realtime_notifications: data.realtime_notifications ?? true,
+          realtime_new_complaint: data.realtime_new_complaint ?? true,
+          realtime_status_change: data.realtime_status_change ?? true,
+          notification_sound: data.notification_sound ?? true,
+        });
+      }
+    };
+
+    loadPreferences();
+  }, [user]);
+
+  useEffect(() => {
+    // Only set up realtime for admins and if notifications are enabled
+    if (!isAdmin || !preferences.realtime_notifications) return;
 
     // Create a channel for complaint changes
     const channel = supabase
@@ -42,11 +79,20 @@ export function useRealtimeNotifications() {
         },
         (payload) => {
           const complaint = payload.new as any;
-          toast({
-            title: "New Complaint Submitted",
-            description: `${complaint.student_name} submitted a complaint (${complaint.ticket_id})`,
-            duration: 5000,
-          });
+          
+          // Check if new complaint notifications are enabled
+          if (preferences.realtime_new_complaint) {
+            toast({
+              title: "New Complaint Submitted",
+              description: `${complaint.student_name} submitted a complaint (${complaint.ticket_id})`,
+              duration: 5000,
+            });
+
+            // Play notification sound if enabled
+            if (preferences.notification_sound) {
+              playNotificationSound();
+            }
+          }
 
           // Log the activity
           logActivity(
@@ -55,9 +101,6 @@ export function useRealtimeNotifications() {
             "complaint",
             complaint.id
           );
-
-          // Play notification sound
-          playNotificationSound();
         }
       )
       .on(
@@ -73,11 +116,19 @@ export function useRealtimeNotifications() {
 
           // Only notify if status changed
           if (oldComplaint.status !== newComplaint.status) {
-            toast({
-              title: "Complaint Status Updated",
-              description: `Complaint ${newComplaint.ticket_id} status changed to ${newComplaint.status}`,
-              duration: 5000,
-            });
+            // Check if status change notifications are enabled
+            if (preferences.realtime_status_change) {
+              toast({
+                title: "Complaint Status Updated",
+                description: `Complaint ${newComplaint.ticket_id} status changed to ${newComplaint.status}`,
+                duration: 5000,
+              });
+
+              // Play notification sound if enabled
+              if (preferences.notification_sound) {
+                playNotificationSound();
+              }
+            }
 
             // Log the activity
             logActivity(
@@ -86,8 +137,6 @@ export function useRealtimeNotifications() {
               "complaint",
               newComplaint.id
             );
-
-            playNotificationSound();
           }
         }
       )
@@ -101,7 +150,7 @@ export function useRealtimeNotifications() {
         supabase.removeChannel(channelRef.current);
       }
     };
-  }, [isAdmin, user, toast]);
+  }, [isAdmin, user, toast, preferences]);
 }
 
 function playNotificationSound() {
