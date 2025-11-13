@@ -50,9 +50,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               .eq("role", "admin")
               .maybeSingle();
             setIsAdmin(!!data);
+            setLoading(false);
           }, 0);
         } else {
           setIsAdmin(false);
+          setLoading(false);
         }
       }
     );
