@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Search, ExternalLink, Trash2, CheckCircle, Calendar, MapPin, Phone, User, Building2, GraduationCap, Home, Bus, BookOpen, Trophy, Utensils, Laptop, Heart, MoreHorizontal, Filter } from "lucide-react";
+import { Search, ExternalLink, CheckCircle, Calendar, MapPin, Phone, User, Building2, GraduationCap, Home, Bus, BookOpen, Trophy, Utensils, Laptop, Heart, MoreHorizontal, Filter } from "lucide-react";
 import { format } from "date-fns";
 
 const iconMap: Record<string, any> = {
@@ -146,25 +146,6 @@ export default function AdminDashboard() {
       toast({
         title: "Success",
         description: `Complaint marked as ${status.replace("_", " ")}`,
-      });
-    }
-  };
-
-  const deleteComplaint = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this complaint?")) return;
-
-    const { error } = await supabase.from("complaints").delete().eq("id", id);
-
-    if (error) {
-      toast({
-        title: "Delete failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Deleted",
-        description: "Complaint has been removed",
       });
     }
   };
@@ -354,15 +335,6 @@ export default function AdminDashboard() {
                           Mark In Progress
                         </Button>
                       )}
-                      
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => deleteComplaint(complaint.id)}
-                        className="ml-auto text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
                     </div>
                   </div>
                 </CardContent>
