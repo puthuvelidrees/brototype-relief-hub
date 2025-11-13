@@ -41,13 +41,23 @@ export default function Navbar() {
                 )}
                 {isAdmin && (
                   <>
-                    <Button asChild variant="ghost" size="sm" className="hidden sm:flex">
+                    <Button 
+                      asChild 
+                      variant={location.pathname === "/admin" ? "default" : "ghost"} 
+                      size="sm" 
+                      className="hidden sm:flex"
+                    >
                       <Link to="/admin">
                         <Shield className="h-4 w-4 mr-2" />
-                        {t.admin}
+                        Admin Dashboard
                       </Link>
                     </Button>
-                    <Button asChild variant="ghost" size="sm" className="hidden sm:flex">
+                    <Button 
+                      asChild 
+                      variant={location.pathname === "/admin/users" ? "default" : "ghost"} 
+                      size="sm" 
+                      className="hidden sm:flex"
+                    >
                       <Link to="/admin/users">
                         <Users className="h-4 w-4 mr-2" />
                         Users
