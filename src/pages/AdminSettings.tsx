@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useRealtimeNotifications } from "@/hooks/useRealtimeNotifications";
 import Navbar from "@/components/Navbar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -19,6 +20,7 @@ export default function AdminSettings() {
   const { user, isAdmin, loading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  useRealtimeNotifications(); // Enable real-time notifications
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   
@@ -55,6 +57,26 @@ export default function AdminSettings() {
       setNotificationEmail(user.email || "");
       loadSettings();
       loadActivityLogs();
+
+      // Set up realtime subscription for activity logs
+      const channel = supabase
+        .channel('activity-logs-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'activity_logs'
+          },
+          () => {
+            loadActivityLogs();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
   }, [user]);
 
