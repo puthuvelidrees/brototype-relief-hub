@@ -135,9 +135,9 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
         description: "Your complaint has been submitted successfully.",
       });
 
-      onSuccess();
       setFile(null);
-      e.currentTarget.reset();
+      e.currentTarget?.reset();
+      onSuccess();
     } catch (err: any) {
       if (err instanceof z.ZodError) {
         toast({
