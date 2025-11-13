@@ -9,6 +9,7 @@ import { LanguageProvider } from "./contexts/LanguageContext";
 import StudentPortal from "./pages/StudentPortal";
 import MyComplaints from "./pages/MyComplaints";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminSettings from "./pages/AdminSettings";
 import UserManagement from "./pages/UserManagement";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -29,6 +30,7 @@ const App = () => (
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/my-complaints" element={<MyComplaints />} />
                 <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin/settings" element={<AdminSettings />} />
                 <Route path="/admin/users" element={<UserManagement />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
