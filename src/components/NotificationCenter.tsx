@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Bell, Check, FileText, Settings as SettingsIcon, User as UserIcon, X, Filter } from "lucide-react";
+import { Bell, Check, FileText, Settings as SettingsIcon, User as UserIcon, X, Filter, Archive, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -15,6 +15,8 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatDistanceToNow } from "date-fns";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface Notification {
   id: string;
@@ -25,6 +27,7 @@ interface Notification {
   entity_id: string | null;
   is_read: boolean;
   created_at: string;
+  archived?: boolean;
 }
 
 export default function NotificationCenter() {
@@ -35,6 +38,11 @@ export default function NotificationCenter() {
   const [isOpen, setIsOpen] = useState(false);
   const [filterType, setFilterType] = useState<string>("all");
   const [filterRead, setFilterRead] = useState<string>("all");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const ITEMS_PER_PAGE = 10;
 
   useEffect(() => {
     if (!user) return;
@@ -63,28 +71,40 @@ export default function NotificationCenter() {
     };
   }, [user]);
 
-  const loadNotifications = async () => {
+  const loadNotifications = async (loadMore = false) => {
     if (!user) return;
+
+    const from = loadMore ? page * ITEMS_PER_PAGE : 0;
+    const to = from + ITEMS_PER_PAGE - 1;
 
     const { data, error } = await supabase
       .from("notifications")
       .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
-      .limit(20);
+      .range(from, to);
 
     if (error) {
       console.error("Error loading notifications:", error);
       return;
     }
 
-    setNotifications(data || []);
-    setUnreadCount(data?.filter(n => !n.is_read).length || 0);
-    applyFilters(data || []);
+    if (data && data.length < ITEMS_PER_PAGE) {
+      setHasMore(false);
+    }
+
+    if (loadMore) {
+      setNotifications(prev => [...prev, ...(data || [])]);
+    } else {
+      setNotifications(data || []);
+    }
+    
+    const allData = loadMore ? [...notifications, ...(data || [])] : (data || []);
+    setUnreadCount(allData.filter((n: any) => !n.is_read).length);
   };
 
-  const applyFilters = (notificationList: Notification[]) => {
-    let filtered = notificationList;
+  const applyFilters = useCallback(() => {
+    let filtered = notifications;
 
     // Filter by type
     if (filterType !== "all") {
@@ -98,12 +118,25 @@ export default function NotificationCenter() {
       filtered = filtered.filter(n => n.is_read);
     }
 
+    // Filter out archived
+    filtered = filtered.filter(n => !n.archived);
+
     setFilteredNotifications(filtered);
-  };
+  }, [notifications, filterType, filterRead]);
 
   useEffect(() => {
-    applyFilters(notifications);
-  }, [filterType, filterRead, notifications]);
+    applyFilters();
+  }, [applyFilters]);
+
+  const handleScroll = useCallback(() => {
+    if (!scrollRef.current || !hasMore) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+    if (scrollHeight - scrollTop <= clientHeight * 1.5) {
+      setPage(prev => prev + 1);
+      loadNotifications(true);
+    }
+  }, [hasMore, page]);
 
   const markAsRead = async (notificationId: string) => {
     const { error } = await supabase
@@ -146,6 +179,32 @@ export default function NotificationCenter() {
         return <UserIcon className="h-4 w-4" />;
       default:
         return <Bell className="h-4 w-4" />;
+    }
+  };
+
+  const getNotificationColor = (type: string) => {
+    switch (type) {
+      case "complaint_action":
+        return "text-blue-500 bg-blue-50 dark:bg-blue-950/50";
+      case "settings_update":
+        return "text-purple-500 bg-purple-50 dark:bg-purple-950/50";
+      case "user_action":
+        return "text-green-500 bg-green-50 dark:bg-green-950/50";
+      default:
+        return "text-gray-500 bg-gray-50 dark:bg-gray-950/50";
+    }
+  };
+
+  const getNotificationColor = (type: string) => {
+    switch (type) {
+      case "complaint_action":
+        return "text-blue-500 bg-blue-50 dark:bg-blue-950/50";
+      case "settings_update":
+        return "text-purple-500 bg-purple-50 dark:bg-purple-950/50";
+      case "user_action":
+        return "text-green-500 bg-green-50 dark:bg-green-950/50";
+      default:
+        return "text-gray-500 bg-gray-50 dark:bg-gray-950/50";
     }
   };
 
