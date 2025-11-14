@@ -195,17 +195,27 @@ export default function NotificationCenter() {
     }
   };
 
-  const getNotificationColor = (type: string) => {
-    switch (type) {
-      case "complaint_action":
-        return "text-blue-500 bg-blue-50 dark:bg-blue-950/50";
-      case "settings_update":
-        return "text-purple-500 bg-purple-50 dark:bg-purple-950/50";
-      case "user_action":
-        return "text-green-500 bg-green-50 dark:bg-green-950/50";
-      default:
-        return "text-gray-500 bg-gray-50 dark:bg-gray-950/50";
+  const archiveNotification = (notificationId: string) => {
+    setNotifications(prev => 
+      prev.map(n => n.id === notificationId ? { ...n, archived: true } : n)
+    );
+    toast.success("Notification archived");
+  };
+
+  const deleteNotification = async (notificationId: string) => {
+    const { error } = await supabase
+      .from("notifications")
+      .delete()
+      .eq("id", notificationId);
+
+    if (error) {
+      console.error("Error deleting notification:", error);
+      toast.error("Failed to delete notification");
+      return;
     }
+
+    setNotifications(prev => prev.filter(n => n.id !== notificationId));
+    toast.success("Notification deleted");
   };
 
   return (
