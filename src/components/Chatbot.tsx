@@ -64,7 +64,7 @@ export default function Chatbot() {
 
   useEffect(() => {
     const handleKeyboard = (e: KeyboardEvent) => {
-      // Check for Ctrl+K or Cmd+K
+      // Check for Ctrl+K or Cmd+K to toggle
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
         setIsOpen(prev => !prev);
@@ -73,11 +73,16 @@ export default function Chatbot() {
           localStorage.setItem('chatbot-hint-seen', 'true');
         }
       }
+      // Check for Escape to close
+      if (e.key === 'Escape' && isOpen) {
+        e.preventDefault();
+        setIsOpen(false);
+      }
     };
 
     window.addEventListener('keydown', handleKeyboard);
     return () => window.removeEventListener('keydown', handleKeyboard);
-  }, [showHint]);
+  }, [showHint, isOpen]);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
