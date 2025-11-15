@@ -62,6 +62,7 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
   const [name, setName] = useState("");
   const [mobile, setMobile] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("");
+  const [isLocationAutoDetected, setIsLocationAutoDetected] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -137,6 +138,11 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
 
           if (nearestLocation) {
             setSelectedLocation(nearestLocation);
+            setIsLocationAutoDetected(true);
+            toast({
+              title: "Location detected",
+              description: "We've selected the nearest location based on your current position. You can change it if needed.",
+            });
           }
         },
         (error) => {
@@ -394,12 +400,21 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="location">{t.location}</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="location">{t.location}</Label>
+              {isLocationAutoDetected && (
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  <span className="h-2 w-2 rounded-full bg-primary animate-pulse"></span>
+                  Auto-detected
+                </span>
+              )}
+            </div>
             <Select 
               name="location" 
               value={selectedLocation}
               onValueChange={(value) => {
                 setSelectedLocation(value);
+                setIsLocationAutoDetected(false);
                 handleSelectChange("location", value);
               }} 
               required
@@ -415,6 +430,11 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
                 ))}
               </SelectContent>
             </Select>
+            {isLocationAutoDetected && (
+              <p className="text-xs text-muted-foreground">
+                You can manually select a different location from the dropdown if needed.
+              </p>
+            )}
             {touched.location && errors.locationId && (
               <p className="text-sm text-destructive">{errors.locationId}</p>
             )}
