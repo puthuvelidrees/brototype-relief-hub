@@ -421,8 +421,8 @@ export default function Auth() {
             <CardDescription>Enter your new password below</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleUpdatePassword} className="space-y-4">
-              <div className="space-y-2">
+            <form onSubmit={handleUpdatePassword} className="space-y-3">
+              <div className="space-y-1">
                 <Label htmlFor="newPassword">New Password</Label>
                 <div className="relative">
                   <Input
@@ -446,7 +446,7 @@ export default function Auth() {
                   </button>
                 </div>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label htmlFor="confirmPassword">Confirm Password</Label>
                 <div className="relative">
                   <Input
@@ -498,8 +498,8 @@ export default function Auth() {
             
             <TabsContent value="signin">
               {!showResetForm ? (
-                <form onSubmit={handleSignIn} className="space-y-4">
-                  <div className="space-y-2">
+                <form onSubmit={handleSignIn} className="space-y-3">
+                  <div className="space-y-1">
                     <Label htmlFor="signinEmail">{t.email}</Label>
                     <Input
                       id="signinEmail"
@@ -509,7 +509,7 @@ export default function Auth() {
                       required
                     />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <Label htmlFor="signinPassword">{t.password}</Label>
                     <div className="relative">
                       <Input
@@ -548,8 +548,8 @@ export default function Auth() {
                   </Button>
                 </form>
               ) : (
-                <form onSubmit={handleResetPassword} className="space-y-4">
-                  <div className="space-y-2">
+                <form onSubmit={handleResetPassword} className="space-y-3">
+                  <div className="space-y-1">
                     <Label htmlFor="resetEmail">{t.email}</Label>
                     <Input
                       id="resetEmail"
@@ -577,8 +577,8 @@ export default function Auth() {
             </TabsContent>
             
             <TabsContent value="signup">
-              <form onSubmit={handleSignUp} className="space-y-4">
-                <div className="space-y-2">
+              <form onSubmit={handleSignUp} className="space-y-3">
+                <div className="space-y-1">
                   <Label htmlFor="fullName">{t.fullName}</Label>
                   <Input
                     id="fullName"
@@ -588,7 +588,7 @@ export default function Auth() {
                     required
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="mobile">{t.mobileNumber}</Label>
                   <Input
                     id="mobile"
@@ -599,7 +599,7 @@ export default function Auth() {
                     required
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="signupEmail">{t.email}</Label>
                   <Input
                     id="signupEmail"
@@ -609,7 +609,7 @@ export default function Auth() {
                     required
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="signupPassword">{t.password}</Label>
                   <div className="relative">
                     <Input
@@ -638,7 +638,7 @@ export default function Auth() {
                     </button>
                   </div>
                   {passwordStrength && (
-                    <div className="space-y-2 mt-3 animate-fade-in">
+                    <div className="space-y-1 mt-2 animate-fade-in">
                       <div className="flex gap-1 mb-2">
                         <div className={`h-1.5 flex-1 rounded-full origin-left transition-all duration-500 ease-out ${
                           passwordStrength === "weak" ? "bg-destructive scale-x-100 animate-strength-fill" : 
