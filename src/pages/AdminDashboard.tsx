@@ -8,9 +8,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Search, ExternalLink, CheckCircle, Calendar, MapPin, Phone, User, Building2, GraduationCap, Home, Bus, BookOpen, Trophy, Utensils, Laptop, Heart, MoreHorizontal, Filter } from "lucide-react";
+import { Search, ExternalLink, CheckCircle, Calendar, MapPin, Phone, User, Building2, GraduationCap, Home, Bus, BookOpen, Trophy, Utensils, Laptop, Heart, MoreHorizontal, Filter, CheckSquare, Square } from "lucide-react";
 import { format } from "date-fns";
 
 const iconMap: Record<string, any> = {
@@ -60,6 +71,10 @@ export default function AdminDashboard() {
   const [selectedPriority, setSelectedPriority] = useState<string>("all");
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedComplaints, setSelectedComplaints] = useState<Set<string>>(new Set());
+  const [showBulkDialog, setShowBulkDialog] = useState(false);
+  const [bulkAction, setBulkAction] = useState<"status" | "priority" | null>(null);
+  const [bulkValue, setBulkValue] = useState<string>("");
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {
@@ -166,6 +181,71 @@ export default function AdminDashboard() {
         title: "Success",
         description: `Complaint marked as ${status.replace("_", " ")}`,
       });
+    }
+  };
+
+  const toggleComplaintSelection = (id: string) => {
+    const newSelected = new Set(selectedComplaints);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedComplaints(newSelected);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedComplaints.size === filteredComplaints.length) {
+      setSelectedComplaints(new Set());
+    } else {
+      setSelectedComplaints(new Set(filteredComplaints.map(c => c.id)));
+    }
+  };
+
+  const handleBulkAction = (action: "status" | "priority", value: string) => {
+    setBulkAction(action);
+    setBulkValue(value);
+    setShowBulkDialog(true);
+  };
+
+  const executeBulkAction = async () => {
+    if (!bulkAction || !bulkValue || selectedComplaints.size === 0) return;
+
+    try {
+      const updates: any = {};
+      if (bulkAction === "status") {
+        updates.status = bulkValue;
+        if (bulkValue === "resolved") {
+          updates.resolved_at = new Date().toISOString();
+        }
+      } else if (bulkAction === "priority") {
+        updates.priority = bulkValue;
+      }
+
+      const { error } = await supabase
+        .from("complaints")
+        .update(updates)
+        .in("id", Array.from(selectedComplaints));
+
+      if (error) throw error;
+
+      toast({
+        title: "Bulk Update Successful",
+        description: `Updated ${selectedComplaints.size} complaint(s)`,
+      });
+
+      setSelectedComplaints(new Set());
+      fetchComplaints();
+    } catch (error: any) {
+      toast({
+        title: "Bulk Update Failed",
+        description: error.message || "Failed to update complaints",
+        variant: "destructive",
+      });
+    } finally {
+      setShowBulkDialog(false);
+      setBulkAction(null);
+      setBulkValue("");
     }
   };
 
@@ -276,18 +356,73 @@ export default function AdminDashboard() {
             </CardHeader>
           </Card>
 
+          {/* Bulk Actions Toolbar */}
+          {selectedComplaints.size > 0 && (
+            <Card className="bg-primary/5 border-primary/20">
+              <CardContent className="py-4">
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      checked={selectedComplaints.size === filteredComplaints.length}
+                      onCheckedChange={toggleSelectAll}
+                    />
+                    <span className="font-medium">
+                      {selectedComplaints.size} complaint(s) selected
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Select onValueChange={(value) => handleBulkAction("status", value)}>
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Update Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pending">Set to Pending</SelectItem>
+                        <SelectItem value="in_progress">Set to In Progress</SelectItem>
+                        <SelectItem value="resolved">Set to Resolved</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select onValueChange={(value) => handleBulkAction("priority", value)}>
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Update Priority" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="low">Set to Low</SelectItem>
+                        <SelectItem value="medium">Set to Medium</SelectItem>
+                        <SelectItem value="high">Set to High</SelectItem>
+                        <SelectItem value="critical">Set to Critical</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      variant="outline"
+                      onClick={() => setSelectedComplaints(new Set())}
+                    >
+                      Clear Selection
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           <div className="space-y-4">
             {filteredComplaints.map((complaint) => (
               <Card key={complaint.id} className="hover:shadow-md transition-shadow">
                 <CardContent className="pt-6">
                   <div className="space-y-4">
-                    <div className="flex items-start justify-between">
-                      <div className="space-y-1 flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="font-semibold">#{complaint.ticket_id}</h3>
-                          <Badge
-                            className={
-                              complaint.status === "pending"
+                    <div className="flex items-start gap-3">
+                      <Checkbox
+                        checked={selectedComplaints.has(complaint.id)}
+                        onCheckedChange={() => toggleComplaintSelection(complaint.id)}
+                        className="mt-1"
+                      />
+                      <div className="flex-1 space-y-4">
+                        <div className="flex items-start justify-between">
+                          <div className="space-y-1 flex-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h3 className="font-semibold">#{complaint.ticket_id}</h3>
+                              <Badge
+                                className={
+                                  complaint.status === "pending"
                                 ? "bg-warning text-warning-foreground"
                                 : complaint.status === "in_progress"
                                 ? "bg-primary text-primary-foreground"
@@ -379,10 +514,31 @@ export default function AdminDashboard() {
                       )}
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+        <AlertDialog open={showBulkDialog} onOpenChange={setShowBulkDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirm Bulk Action</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to update {selectedComplaints.size} complaint(s)?
+                {bulkAction === "status" && ` The status will be changed to "${bulkValue.replace("_", " ")}".`}
+                {bulkAction === "priority" && ` The priority will be changed to "${bulkValue}".`}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={executeBulkAction}>
+                Confirm Update
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
           {filteredComplaints.length === 0 && (
             <Card>
