@@ -21,8 +21,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Search, ExternalLink, CheckCircle, Calendar, MapPin, Phone, User, Building2, GraduationCap, Home, Bus, BookOpen, Trophy, Utensils, Laptop, Heart, MoreHorizontal, Filter, CheckSquare, Square } from "lucide-react";
+import { Search, ExternalLink, CheckCircle, Calendar, MapPin, Phone, User, Building2, GraduationCap, Home, Bus, BookOpen, Trophy, Utensils, Laptop, Heart, MoreHorizontal, Filter, CheckSquare, Square, Download } from "lucide-react";
 import { format } from "date-fns";
+import ExportDialog from "@/components/ExportDialog";
 
 const iconMap: Record<string, any> = {
   Building2, GraduationCap, Home, Bus, BookOpen, Trophy, Utensils, Laptop, Heart, MoreHorizontal
@@ -79,6 +80,7 @@ export default function AdminDashboard() {
   const [showBulkDialog, setShowBulkDialog] = useState(false);
   const [bulkAction, setBulkAction] = useState<"status" | "priority" | null>(null);
   const [bulkValue, setBulkValue] = useState<string>("");
+  const [showExportDialog, setShowExportDialog] = useState(false);
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {
@@ -386,6 +388,10 @@ export default function AdminDashboard() {
                       <SelectItem value="critical">Critical</SelectItem>
                     </SelectContent>
                   </Select>
+                  <Button onClick={() => setShowExportDialog(true)} variant="outline" className="gap-2">
+                    <Download className="h-4 w-4" />
+                    Export
+                  </Button>
                 </div>
               </div>
             </CardHeader>
@@ -579,6 +585,14 @@ export default function AdminDashboard() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Export Dialog */}
+        <ExportDialog
+          open={showExportDialog}
+          onOpenChange={setShowExportDialog}
+          complaints={complaints}
+          categories={categories}
+        />
 
           {filteredComplaints.length === 0 && (
             <Card>
