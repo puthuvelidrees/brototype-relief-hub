@@ -106,6 +106,9 @@ export default function Auth() {
     if (passwordStrength === "strong" && !hasShownConfetti.current) {
       hasShownConfetti.current = true;
       
+      // Play success sound
+      playSuccessSound();
+      
       // Fire confetti from multiple angles
       const duration = 2000;
       const animationEnd = Date.now() + duration;
@@ -141,6 +144,39 @@ export default function Auth() {
       hasShownConfetti.current = false;
     }
   }, [passwordStrength]);
+
+  const playSuccessSound = () => {
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      
+      // Create a pleasant success melody
+      const playTone = (frequency: number, startTime: number, duration: number) => {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.value = frequency;
+        oscillator.type = 'sine';
+        
+        gainNode.gain.setValueAtTime(0, startTime);
+        gainNode.gain.linearRampToValueAtTime(0.3, startTime + 0.01);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+        
+        oscillator.start(startTime);
+        oscillator.stop(startTime + duration);
+      };
+      
+      // Play a pleasant ascending melody (C-E-G major chord arpeggio)
+      const now = audioContext.currentTime;
+      playTone(523.25, now, 0.15); // C5
+      playTone(659.25, now + 0.1, 0.15); // E5
+      playTone(783.99, now + 0.2, 0.25); // G5
+    } catch (error) {
+      console.log("Audio playback not supported");
+    }
+  };
 
   useEffect(() => {
     if (!loading && user && !isPasswordRecovery) {
