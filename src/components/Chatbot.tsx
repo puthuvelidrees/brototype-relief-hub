@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageCircle, X, Send, Bot, User, FileText, List, FolderOpen, Check, CheckCheck } from "lucide-react";
+import { MessageCircle, X, Send, Bot, User, FileText, List, FolderOpen, Check, CheckCheck, Minimize2, Maximize2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -21,8 +21,10 @@ export default function Chatbot() {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(true);
   const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
+  const [shouldBounce, setShouldBounce] = useState(false);
   const [position, setPosition] = useState(() => {
     const saved = localStorage.getItem('chatbot-position');
     if (saved) {
@@ -70,7 +72,14 @@ export default function Chatbot() {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages]);
+    
+    // Trigger bounce animation when new assistant message arrives and chat is closed
+    if (!isOpen && messages.length > 0 && messages[messages.length - 1].role === 'assistant') {
+      setShouldBounce(true);
+      setHasUnreadMessages(true);
+      setTimeout(() => setShouldBounce(false), 1000);
+    }
+  }, [messages, isOpen]);
 
   useEffect(() => {
     const handleKeyboard = (e: KeyboardEvent) => {
@@ -361,6 +370,7 @@ export default function Chatbot() {
             onClick={(e) => {
               if (!isDragging) {
                 setIsOpen(true);
+                setIsMinimized(false);
                 setHasUnreadMessages(false);
                 if (showHint) {
                   setShowHint(false);
@@ -368,7 +378,10 @@ export default function Chatbot() {
                 }
               }
             }}
-            className="h-20 w-20 rounded-full shadow-2xl relative ring-4 ring-primary/30 cursor-move animate-pulse"
+            className={cn(
+              "h-20 w-20 rounded-full shadow-2xl relative ring-4 ring-primary/30 cursor-move",
+              shouldBounce && "animate-bounce"
+            )}
             style={{ 
               cursor: isDragging ? 'grabbing' : 'grab'
             }}
@@ -395,10 +408,12 @@ export default function Chatbot() {
       {/* Chat Window */}
       {isOpen && (
         <Card 
-          className="fixed w-[380px] h-[600px] shadow-2xl z-50 flex flex-col" 
+          className="fixed shadow-2xl z-50 flex flex-col transition-all duration-300" 
           style={{ 
             left: `${position.x}px`,
-            top: `${position.y}px`
+            top: `${position.y}px`,
+            width: '380px',
+            height: isMinimized ? 'auto' : '600px'
           }}
         >
           {/* Header */}
@@ -420,18 +435,30 @@ export default function Chatbot() {
                 <p className="text-xs opacity-90">{alwaysHereLabels[language] || alwaysHereLabels.en}</p>
               </div>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsOpen(false)}
-              className="hover:bg-primary-foreground/10"
-            >
-              <X className="h-5 w-5" />
-            </Button>
+            <div className="flex gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsMinimized(!isMinimized)}
+                className="hover:bg-primary-foreground/10"
+              >
+                {isMinimized ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsOpen(false)}
+                className="hover:bg-primary-foreground/10"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
 
-          {/* Messages */}
-          <ScrollArea className="flex-1 p-4" ref={scrollRef}>
+          {/* Messages - Only show when not minimized */}
+          {!isMinimized && (
+            <>
+              <ScrollArea className="flex-1 p-4" ref={scrollRef}>
             <div className="space-y-4">
               {/* Quick Actions */}
               {showQuickActions && messages.length === 1 && (
@@ -555,6 +582,8 @@ export default function Chatbot() {
               </Button>
             </div>
           </form>
+            </>
+          )}
         </Card>
       )}
     </>
