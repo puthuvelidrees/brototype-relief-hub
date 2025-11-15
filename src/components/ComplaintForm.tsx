@@ -18,6 +18,7 @@ const complaintSchema = z.object({
   locationId: z.string().uuid("Please select a location"),
   domainId: z.string().uuid("Please select a domain"),
   categoryId: z.string().uuid("Please select a category"),
+  priority: z.enum(["low", "medium", "high", "critical"], { required_error: "Please select a priority" }),
   description: z.string().trim().min(10, "Description must be at least 10 characters").max(1000),
 });
 
@@ -43,6 +44,7 @@ interface FieldErrors {
   locationId?: string;
   domainId?: string;
   categoryId?: string;
+  priority?: string;
   description?: string;
 }
 
@@ -106,6 +108,9 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
         case "category":
           complaintSchema.shape.categoryId.parse(value);
           break;
+        case "priority":
+          complaintSchema.shape.priority.parse(value);
+          break;
         case "description":
           complaintSchema.shape.description.parse(value);
           break;
@@ -140,6 +145,7 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
       locationId: formData.get("location") as string,
       domainId: formData.get("domain") as string,
       categoryId: formData.get("category") as string,
+      priority: formData.get("priority") as "low" | "medium" | "high" | "critical",
       description: formData.get("description") as string,
     };
 
@@ -220,6 +226,7 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
         location_id: data.locationId,
         domain_id: data.domainId,
         category_id: data.categoryId,
+        priority: data.priority,
         description: data.description,
         file_url: fileUrl,
         file_type: fileType,
@@ -351,6 +358,44 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
             </Select>
             {touched.category && errors.categoryId && (
               <p className="text-sm text-destructive">{errors.categoryId}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="priority">Priority Level</Label>
+            <Select name="priority" onValueChange={(value) => handleSelectChange("priority", value)} required>
+              <SelectTrigger className={`bg-background ${touched.priority && errors.priority ? "border-destructive" : ""}`}>
+                <SelectValue placeholder="Select priority level" />
+              </SelectTrigger>
+              <SelectContent className="bg-popover z-50">
+                <SelectItem value="low">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                    Low
+                  </div>
+                </SelectItem>
+                <SelectItem value="medium">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
+                    Medium
+                  </div>
+                </SelectItem>
+                <SelectItem value="high">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-orange-500"></div>
+                    High
+                  </div>
+                </SelectItem>
+                <SelectItem value="critical">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                    Critical
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            {touched.priority && errors.priority && (
+              <p className="text-sm text-destructive">{errors.priority}</p>
             )}
           </div>
 
