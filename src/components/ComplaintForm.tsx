@@ -59,6 +59,9 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
   const [categories, setCategories] = useState<Category[]>([]);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [name, setName] = useState("");
+  const [mobile, setMobile] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -73,6 +76,77 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
     };
     fetchData();
   }, []);
+
+  // Fetch user profile and auto-fill name and mobile
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user?.id) return;
+      
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("full_name, mobile")
+        .eq("id", user.id)
+        .single();
+      
+      if (profile) {
+        if (profile.full_name) setName(profile.full_name);
+        if (profile.mobile) setMobile(profile.mobile);
+      }
+    };
+    
+    fetchProfile();
+  }, [user]);
+
+  // Auto-select location based on geolocation
+  useEffect(() => {
+    if (locations.length === 0) return;
+
+    const autoSelectLocation = () => {
+      if (!navigator.geolocation) return;
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          
+          // Location coordinates (approximate)
+          const locationCoords: Record<string, { lat: number; lng: number }> = {
+            "Kochi": { lat: 9.9312, lng: 76.2673 },
+            "Alappuzha": { lat: 9.4981, lng: 76.3388 },
+            "Kollam": { lat: 8.8932, lng: 76.6141 },
+            "Thiruvananthapuram": { lat: 8.5241, lng: 76.9366 },
+            "Ernakulam": { lat: 9.9312, lng: 76.2673 },
+          };
+
+          // Find nearest location
+          let nearestLocation = "";
+          let minDistance = Infinity;
+
+          locations.forEach((location) => {
+            const coords = locationCoords[location.name];
+            if (coords) {
+              const distance = Math.sqrt(
+                Math.pow(coords.lat - latitude, 2) + 
+                Math.pow(coords.lng - longitude, 2)
+              );
+              if (distance < minDistance) {
+                minDistance = distance;
+                nearestLocation = location.id;
+              }
+            }
+          });
+
+          if (nearestLocation) {
+            setSelectedLocation(nearestLocation);
+          }
+        },
+        (error) => {
+          console.log("Geolocation error:", error);
+        }
+      );
+    };
+
+    autoSelectLocation();
+  }, [locations]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -288,6 +362,8 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
               <Input 
                 id="name" 
                 name="name" 
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 placeholder="Your name" 
                 onBlur={handleBlur}
                 className={touched.name && errors.name ? "border-destructive" : ""}
@@ -303,6 +379,8 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
                 id="mobile" 
                 name="mobile" 
                 type="tel" 
+                value={mobile}
+                onChange={(e) => setMobile(e.target.value)}
                 placeholder="9876543210" 
                 maxLength={10}
                 onBlur={handleBlur}
@@ -317,7 +395,15 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
 
           <div className="space-y-2">
             <Label htmlFor="location">{t.location}</Label>
-            <Select name="location" onValueChange={(value) => handleSelectChange("location", value)} required>
+            <Select 
+              name="location" 
+              value={selectedLocation}
+              onValueChange={(value) => {
+                setSelectedLocation(value);
+                handleSelectChange("location", value);
+              }} 
+              required
+            >
               <SelectTrigger className={`bg-background ${touched.location && errors.locationId ? "border-destructive" : ""}`}>
                 <SelectValue placeholder={t.selectLocation} />
               </SelectTrigger>
