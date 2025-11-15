@@ -6,6 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageCircle, X, Send, Bot, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Message {
   role: "user" | "assistant";
@@ -13,17 +14,34 @@ interface Message {
 }
 
 export default function Chatbot() {
+  const { language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
+  
+  const welcomeMessages: Record<string, string> = {
+    en: "Hi! I'm here to help you with the complaint process. Ask me anything about submitting complaints, tracking them, or understanding the system.",
+    hi: "नमस्ते! मैं शिकायत प्रक्रिया में आपकी मदद करने के लिए यहां हूं। शिकायत दर्ज करने, उन्हें ट्रैक करने या सिस्टम को समझने के बारे में मुझसे कुछ भी पूछें।",
+    ml: "ഹായ്! പരാതി പ്രക്രിയയിൽ നിങ്ങളെ സഹായിക്കാൻ ഞാൻ ഇവിടെയുണ്ട്. പരാതികൾ സമർപ്പിക്കുന്നതിനെക്കുറിച്ചോ അവ ട്രാക്ക് ചെയ്യുന്നതിനെക്കുറിച്ചോ സിസ്റ്റം മനസ്സിലാക്കുന്നതിനെക്കുറിച്ചോ എന്തും എന്നോട് ചോദിക്കുക.",
+    ta: "வணக்கம்! புகார் செயல்முறையில் உங்களுக்கு உதவ நான் இங்கே இருக்கிறேன். புகார்களை சமர்ப்பிப்பது, அவற்றைக் கண்காணிப்பது அல்லது அமைப்பைப் புரிந்துகொள்வது பற்றி என்னிடம் எதையும் கேளுங்கள்."
+  };
+  
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Hi! I'm here to help you with the complaint process. Ask me anything about submitting complaints, tracking them, or understanding the system.",
+      content: welcomeMessages[language] || welcomeMessages.en,
     },
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  // Update welcome message when language changes
+  useEffect(() => {
+    setMessages([{
+      role: "assistant",
+      content: welcomeMessages[language] || welcomeMessages.en,
+    }]);
+  }, [language]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -45,7 +63,7 @@ export default function Chatbot() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({ messages: newMessages }),
+          body: JSON.stringify({ messages: newMessages, language }),
         }
       );
 
@@ -124,6 +142,27 @@ export default function Chatbot() {
     await streamChat(userMessage);
   };
 
+  const placeholders: Record<string, string> = {
+    en: "Ask me anything...",
+    hi: "मुझसे कुछ भी पूछें...",
+    ml: "എന്തും എന്നോട് ചോദിക്കുക...",
+    ta: "என்னிடம் எதையும் கேளுங்கள்..."
+  };
+
+  const aiAssistantLabels: Record<string, string> = {
+    en: "AI Assistant",
+    hi: "AI सहायक",
+    ml: "AI അസിസ്റ്റന്റ്",
+    ta: "AI உதவியாளர்"
+  };
+
+  const alwaysHereLabels: Record<string, string> = {
+    en: "Always here to help",
+    hi: "हमेशा मदद के लिए यहां",
+    ml: "എപ്പോഴും സഹായിക്കാൻ ഇവിടെ",
+    ta: "எப்போதும் உதவ இங்கே"
+  };
+
   return (
     <>
       {/* Floating Chat Button */}
@@ -145,8 +184,8 @@ export default function Chatbot() {
             <div className="flex items-center gap-2">
               <Bot className="h-5 w-5" />
               <div>
-                <h3 className="font-semibold">AI Assistant</h3>
-                <p className="text-xs opacity-90">Always here to help</p>
+                <h3 className="font-semibold">{aiAssistantLabels[language] || aiAssistantLabels.en}</h3>
+                <p className="text-xs opacity-90">{alwaysHereLabels[language] || alwaysHereLabels.en}</p>
               </div>
             </div>
             <Button
@@ -219,7 +258,7 @@ export default function Chatbot() {
               <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask me anything..."
+                placeholder={placeholders[language] || placeholders.en}
                 disabled={isLoading}
                 className="flex-1"
               />
