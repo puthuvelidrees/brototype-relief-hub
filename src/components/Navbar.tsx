@@ -4,7 +4,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Moon, Sun, LogOut, Shield, User, Languages, Users, ChevronDown, FileText, Settings } from "lucide-react";
+import { Moon, Sun, LogOut, Shield, User, Languages, Users, ChevronDown, FileText, Settings, TrendingUp } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import NotificationCenter from "@/components/NotificationCenter";
 
@@ -63,6 +63,12 @@ export default function Navbar() {
                         <Link to="/admin/users" className="flex items-center cursor-pointer">
                           <Users className="h-4 w-4 mr-2" />
                           Manage Users
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin/analytics" className="flex items-center cursor-pointer">
+                          <TrendingUp className="h-4 w-4 mr-2" />
+                          Analytics
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
