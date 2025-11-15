@@ -26,6 +26,9 @@ export default function Chatbot() {
   const [position, setPosition] = useState({ x: window.innerWidth - 120, y: window.innerHeight - 120 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [showHint, setShowHint] = useState(() => {
+    return !localStorage.getItem('chatbot-hint-seen');
+  });
   
   const welcomeMessages: Record<string, string> = {
     en: "Hi! I'm here to help you with the complaint process. Ask me anything about submitting complaints, tracking them, or understanding the system.",
@@ -65,12 +68,16 @@ export default function Chatbot() {
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
         setIsOpen(prev => !prev);
+        if (showHint) {
+          setShowHint(false);
+          localStorage.setItem('chatbot-hint-seen', 'true');
+        }
       }
     };
 
     window.addEventListener('keydown', handleKeyboard);
     return () => window.removeEventListener('keydown', handleKeyboard);
-  }, []);
+  }, [showHint]);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -330,30 +337,41 @@ export default function Chatbot() {
     <>
       {/* Floating Chat Button */}
       {!isOpen && (
-        <Button
-          onMouseDown={handleDragStart}
-          onClick={(e) => {
-            if (!isDragging) {
-              setIsOpen(true);
-              setHasUnreadMessages(false);
-            }
-          }}
-          className="fixed h-20 w-20 rounded-full shadow-2xl z-50 relative ring-4 ring-primary/30 cursor-move animate-pulse"
-          style={{ 
-            left: `${position.x}px`,
-            top: `${position.y}px`,
-            cursor: isDragging ? 'grabbing' : 'grab'
-          }}
-          size="icon"
-        >
-          <MessageCircle className="h-10 w-10" />
-          {hasUnreadMessages && (
-            <span className="absolute -top-1 -right-1 h-4 w-4 bg-destructive rounded-full animate-ping" />
+        <div className="fixed z-50" style={{ left: `${position.x}px`, top: `${position.y}px` }}>
+          <Button
+            onMouseDown={handleDragStart}
+            onClick={(e) => {
+              if (!isDragging) {
+                setIsOpen(true);
+                setHasUnreadMessages(false);
+                if (showHint) {
+                  setShowHint(false);
+                  localStorage.setItem('chatbot-hint-seen', 'true');
+                }
+              }
+            }}
+            className="h-20 w-20 rounded-full shadow-2xl relative ring-4 ring-primary/30 cursor-move animate-pulse"
+            style={{ 
+              cursor: isDragging ? 'grabbing' : 'grab'
+            }}
+            size="icon"
+          >
+            <MessageCircle className="h-10 w-10" />
+            {hasUnreadMessages && (
+              <span className="absolute -top-1 -right-1 h-4 w-4 bg-destructive rounded-full animate-ping" />
+            )}
+            {hasUnreadMessages && (
+              <span className="absolute -top-1 -right-1 h-4 w-4 bg-destructive rounded-full" />
+            )}
+          </Button>
+          
+          {showHint && (
+            <div className="absolute -top-16 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-3 py-2 rounded-lg shadow-lg text-sm whitespace-nowrap animate-bounce">
+              Press Ctrl+K
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-primary"></div>
+            </div>
           )}
-          {hasUnreadMessages && (
-            <span className="absolute -top-1 -right-1 h-4 w-4 bg-destructive rounded-full" />
-          )}
-        </Button>
+        </div>
       )}
 
       {/* Chat Window */}
