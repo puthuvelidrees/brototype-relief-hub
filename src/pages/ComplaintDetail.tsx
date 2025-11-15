@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import CommentsSection from "@/components/CommentsSection";
 import ComplaintTimeline from "@/components/ComplaintTimeline";
+import RatingForm from "@/components/RatingForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -266,6 +267,11 @@ export default function ComplaintDetail() {
           <ComplaintTimeline complaintId={complaint.id} />
 
           <CommentsSection complaintId={complaint.id} />
+
+          <RatingForm 
+            complaintId={complaint.id} 
+            complaintStatus={complaint.status}
+          />
         </div>
       </main>
     </div>
