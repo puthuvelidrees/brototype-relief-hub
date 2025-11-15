@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageCircle, X, Send, Bot, User, FileText, List, FolderOpen } from "lucide-react";
+import { MessageCircle, X, Send, Bot, User, FileText, List, FolderOpen, Check, CheckCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -12,6 +12,8 @@ import { useNavigate } from "react-router-dom";
 interface Message {
   role: "user" | "assistant";
   content: string;
+  status?: "sending" | "sent" | "delivered" | "read";
+  timestamp?: string;
 }
 
 export default function Chatbot() {
@@ -53,8 +55,24 @@ export default function Chatbot() {
   }, [messages]);
 
   const streamChat = async (userMessage: string) => {
-    const newMessages = [...messages, { role: "user" as const, content: userMessage }];
+    const userMsg: Message = { 
+      role: "user", 
+      content: userMessage, 
+      status: "sending",
+      timestamp: new Date().toISOString()
+    };
+    const newMessages = [...messages, userMsg];
     setMessages(newMessages);
+    
+    // Update to "sent" status
+    setTimeout(() => {
+      setMessages(prev => prev.map((msg, idx) => 
+        idx === prev.length - 1 && msg.role === "user" 
+          ? { ...msg, status: "sent" as const } 
+          : msg
+      ));
+    }, 100);
+    
     setIsLoading(true);
 
     try {
@@ -73,6 +91,13 @@ export default function Chatbot() {
       if (!response.ok || !response.body) {
         throw new Error("Failed to start stream");
       }
+
+      // Update to "delivered" status
+      setMessages(prev => prev.map((msg, idx) => 
+        idx === prev.length - 1 && msg.role === "user" 
+          ? { ...msg, status: "delivered" as const } 
+          : msg
+      ));
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
@@ -123,6 +148,13 @@ export default function Chatbot() {
           }
         }
       }
+      
+      // Update user message to "read" status
+      setMessages(prev => prev.map((msg, idx) => 
+        idx === prev.length - 2 && msg.role === "user" 
+          ? { ...msg, status: "read" as const } 
+          : msg
+      ));
     } catch (error) {
       console.error("Chat error:", error);
       toast({
@@ -151,6 +183,13 @@ export default function Chatbot() {
     hi: "मुझसे कुछ भी पूछें...",
     ml: "എന്തും എന്നോട് ചോദിക്കുക...",
     ta: "என்னிடம் எதையும் கேளுங்கள்..."
+  };
+
+  const typingTexts: Record<string, string> = {
+    en: "AI is typing...",
+    hi: "AI टाइप कर रहा है...",
+    ml: "AI ടൈപ്പ് ചെയ്യുന്നു...",
+    ta: "AI தட்டச்சு செய்கிறது..."
   };
 
   const aiAssistantLabels: Record<string, string> = {
@@ -307,15 +346,32 @@ export default function Chatbot() {
                       <User className="h-4 w-4" />
                     )}
                   </div>
-                  <div
-                    className={cn(
-                      "rounded-lg px-4 py-2 max-w-[75%]",
-                      message.role === "assistant"
-                        ? "bg-muted"
-                        : "bg-primary text-primary-foreground"
+                  <div className="flex flex-col gap-1 max-w-[75%]">
+                    <div
+                      className={cn(
+                        "rounded-lg px-4 py-2",
+                        message.role === "assistant"
+                          ? "bg-muted"
+                          : "bg-primary text-primary-foreground"
+                      )}
+                    >
+                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    </div>
+                    {message.role === "user" && (
+                      <div className="flex items-center gap-1 justify-end text-xs text-muted-foreground">
+                        {message.timestamp && (
+                          <span>
+                            {new Date(message.timestamp).toLocaleTimeString([], { 
+                              hour: '2-digit', 
+                              minute: '2-digit' 
+                            })}
+                          </span>
+                        )}
+                        {message.status === "sent" && <Check className="w-3 h-3" />}
+                        {message.status === "delivered" && <CheckCheck className="w-3 h-3" />}
+                        {message.status === "read" && <CheckCheck className="w-3 h-3 text-primary" />}
+                      </div>
                     )}
-                  >
-                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                   </div>
                 </div>
               ))}
@@ -324,12 +380,15 @@ export default function Chatbot() {
                   <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
                     <Bot className="h-4 w-4" />
                   </div>
-                  <div className="rounded-lg px-4 py-2 bg-muted">
-                    <div className="flex gap-1">
-                      <div className="w-2 h-2 rounded-full bg-foreground/40 animate-bounce" />
-                      <div className="w-2 h-2 rounded-full bg-foreground/40 animate-bounce [animation-delay:0.2s]" />
-                      <div className="w-2 h-2 rounded-full bg-foreground/40 animate-bounce [animation-delay:0.4s]" />
+                  <div className="rounded-lg px-4 py-3 bg-muted">
+                    <div className="flex gap-1 mb-2">
+                      <div className="w-2 h-2 rounded-full bg-primary/60 animate-bounce" />
+                      <div className="w-2 h-2 rounded-full bg-primary/60 animate-bounce [animation-delay:0.2s]" />
+                      <div className="w-2 h-2 rounded-full bg-primary/60 animate-bounce [animation-delay:0.4s]" />
                     </div>
+                    <p className="text-xs text-muted-foreground italic">
+                      {typingTexts[language] || typingTexts.en}
+                    </p>
                   </div>
                 </div>
               )}
