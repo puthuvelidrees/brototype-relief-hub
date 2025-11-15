@@ -25,6 +25,7 @@ import { Search, ExternalLink, CheckCircle, Calendar, MapPin, Phone, User, Build
 import { format } from "date-fns";
 import ExportDialog from "@/components/ExportDialog";
 import SLAIndicator from "@/components/SLAIndicator";
+import EscalationBadge from "@/components/EscalationBadge";
 
 const iconMap: Record<string, any> = {
   Building2, GraduationCap, Home, Bus, BookOpen, Trophy, Utensils, Laptop, Heart, MoreHorizontal
@@ -54,6 +55,9 @@ interface Complaint {
   resolved_at: string | null;
   sla_response_breached: boolean;
   sla_resolution_breached: boolean;
+  escalation_level: number;
+  escalated_at: string | null;
+  escalation_reason: string | null;
   assigned_to: string | null;
   assigned_admin?: {
     full_name: string | null;
@@ -497,6 +501,11 @@ export default function AdminDashboard() {
                               Assigned: {complaint.assigned_admin.full_name || "Unknown"}
                             </Badge>
                           )}
+                          <EscalationBadge
+                            escalationLevel={complaint.escalation_level}
+                            escalatedAt={complaint.escalated_at}
+                            escalationReason={complaint.escalation_reason}
+                          />
                         </div>
                         
                         {/* SLA Indicators */}

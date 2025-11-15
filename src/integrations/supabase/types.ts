@@ -82,6 +82,11 @@ export type Database = {
           daily_digest: boolean | null
           default_complaint_status: string | null
           email_notifications: boolean | null
+          escalation_auto_priority: boolean | null
+          escalation_enabled: boolean | null
+          escalation_max_level: number | null
+          escalation_sla_breach_auto: boolean | null
+          escalation_unresolved_hours: number | null
           id: string
           max_complaints_per_day: number | null
           new_complaint_notification: boolean | null
@@ -107,6 +112,11 @@ export type Database = {
           daily_digest?: boolean | null
           default_complaint_status?: string | null
           email_notifications?: boolean | null
+          escalation_auto_priority?: boolean | null
+          escalation_enabled?: boolean | null
+          escalation_max_level?: number | null
+          escalation_sla_breach_auto?: boolean | null
+          escalation_unresolved_hours?: number | null
           id?: string
           max_complaints_per_day?: number | null
           new_complaint_notification?: boolean | null
@@ -132,6 +142,11 @@ export type Database = {
           daily_digest?: boolean | null
           default_complaint_status?: string | null
           email_notifications?: boolean | null
+          escalation_auto_priority?: boolean | null
+          escalation_enabled?: boolean | null
+          escalation_max_level?: number | null
+          escalation_sla_breach_auto?: boolean | null
+          escalation_unresolved_hours?: number | null
           id?: string
           max_complaints_per_day?: number | null
           new_complaint_notification?: boolean | null
@@ -215,6 +230,9 @@ export type Database = {
           created_at: string | null
           description: string
           domain_id: string | null
+          escalated_at: string | null
+          escalation_level: number | null
+          escalation_reason: string | null
           file_type: string | null
           file_url: string | null
           first_response_at: string | null
@@ -237,6 +255,9 @@ export type Database = {
           created_at?: string | null
           description: string
           domain_id?: string | null
+          escalated_at?: string | null
+          escalation_level?: number | null
+          escalation_reason?: string | null
           file_type?: string | null
           file_url?: string | null
           first_response_at?: string | null
@@ -259,6 +280,9 @@ export type Database = {
           created_at?: string | null
           description?: string
           domain_id?: string | null
+          escalated_at?: string | null
+          escalation_level?: number | null
+          escalation_reason?: string | null
           file_type?: string | null
           file_url?: string | null
           first_response_at?: string | null
@@ -429,18 +453,21 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string
+          is_senior: boolean | null
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
           created_at?: string | null
           id?: string
+          is_senior?: boolean | null
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
           created_at?: string | null
           id?: string
+          is_senior?: boolean | null
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
@@ -453,6 +480,10 @@ export type Database = {
     Functions: {
       auto_assign_complaint: { Args: { complaint_id: string }; Returns: string }
       cleanup_old_login_attempts: { Args: never; Returns: undefined }
+      escalate_complaint: {
+        Args: { p_complaint_id: string; p_reason: string }
+        Returns: undefined
+      }
       generate_ticket_id: { Args: never; Returns: string }
       has_role: {
         Args: {

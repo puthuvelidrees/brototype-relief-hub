@@ -18,6 +18,7 @@ interface UserProfile {
   created_at: string;
   email?: string;
   isAdmin: boolean;
+  isSenior: boolean;
 }
 
 export default function UserManagement() {
@@ -73,7 +74,7 @@ export default function UserManagement() {
       // Fetch all user roles
       const { data: roles, error: rolesError } = await supabase
         .from("user_roles")
-        .select("user_id, role");
+        .select("user_id, role, is_senior");
 
       if (rolesError) throw rolesError;
 
@@ -84,10 +85,12 @@ export default function UserManagement() {
       const usersWithRoles = profiles?.map((profile) => {
         const userRoles = roles?.filter((r) => r.user_id === profile.id) || [];
         const isAdmin = userRoles.some((r) => r.role === "admin");
+        const isSenior = userRoles.some((r) => r.role === "admin" && r.is_senior === true);
         
         return {
           ...profile,
           isAdmin,
+          isSenior,
         };
       }) || [];
 
@@ -148,6 +151,44 @@ export default function UserManagement() {
     } catch (error: any) {
       toast({
         title: "Error updating role",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const toggleSeniorStatus = async (userId: string, isAdmin: boolean, currentlySenior: boolean) => {
+    try {
+      if (!isAdmin) {
+        toast({
+          title: "Error",
+          description: "User must be an admin to be marked as senior",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Update the is_senior flag in user_roles
+      const { error } = await supabase
+        .from("user_roles")
+        .update({ is_senior: !currentlySenior })
+        .eq("user_id", userId)
+        .eq("role", "admin");
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: currentlySenior 
+          ? "Senior admin status removed successfully" 
+          : "Senior admin status granted successfully",
+      });
+
+      // Refresh users list
+      fetchUsers();
+    } catch (error: any) {
+      toast({
+        title: "Error updating senior status",
         description: error.message,
         variant: "destructive",
       });
@@ -237,6 +278,11 @@ export default function UserManagement() {
                             Admin
                           </Badge>
                         )}
+                        {userProfile.isSenior && (
+                          <Badge className="bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
+                            Senior
+                          </Badge>
+                        )}
                         {userProfile.id === user?.id && (
                           <Badge variant="outline">You</Badge>
                         )}
@@ -256,23 +302,34 @@ export default function UserManagement() {
 
                     <div className="flex items-center gap-2">
                       {userProfile.id !== user?.id && (
-                        <Button
-                          variant={userProfile.isAdmin ? "destructive" : "default"}
-                          size="sm"
-                          onClick={() => toggleAdminRole(userProfile.id, userProfile.isAdmin)}
-                        >
-                          {userProfile.isAdmin ? (
-                            <>
-                              <ShieldOff className="h-4 w-4 mr-2" />
-                              Remove Admin
-                            </>
-                          ) : (
-                            <>
-                              <Shield className="h-4 w-4 mr-2" />
-                              Make Admin
-                            </>
+                        <>
+                          <Button
+                            variant={userProfile.isAdmin ? "destructive" : "default"}
+                            size="sm"
+                            onClick={() => toggleAdminRole(userProfile.id, userProfile.isAdmin)}
+                          >
+                            {userProfile.isAdmin ? (
+                              <>
+                                <ShieldOff className="h-4 w-4 mr-2" />
+                                Remove Admin
+                              </>
+                            ) : (
+                              <>
+                                <Shield className="h-4 w-4 mr-2" />
+                                Make Admin
+                              </>
+                            )}
+                          </Button>
+                          {userProfile.isAdmin && (
+                            <Button
+                              variant={userProfile.isSenior ? "outline" : "secondary"}
+                              size="sm"
+                              onClick={() => toggleSeniorStatus(userProfile.id, userProfile.isAdmin, userProfile.isSenior)}
+                            >
+                              {userProfile.isSenior ? "Remove Senior" : "Make Senior"}
+                            </Button>
                           )}
-                        </Button>
+                        </>
                       )}
                     </div>
                   </div>
