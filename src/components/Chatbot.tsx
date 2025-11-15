@@ -3,10 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageCircle, X, Send, Bot, User } from "lucide-react";
+import { MessageCircle, X, Send, Bot, User, FileText, List, FolderOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useNavigate } from "react-router-dom";
 
 interface Message {
   role: "user" | "assistant";
@@ -15,7 +16,9 @@ interface Message {
 
 export default function Chatbot() {
   const { language } = useLanguage();
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+  const [showQuickActions, setShowQuickActions] = useState(true);
   
   const welcomeMessages: Record<string, string> = {
     en: "Hi! I'm here to help you with the complaint process. Ask me anything about submitting complaints, tracking them, or understanding the system.",
@@ -139,6 +142,7 @@ export default function Chatbot() {
 
     const userMessage = input.trim();
     setInput("");
+    setShowQuickActions(false);
     await streamChat(userMessage);
   };
 
@@ -162,6 +166,58 @@ export default function Chatbot() {
     ml: "എപ്പോഴും സഹായിക്കാൻ ഇവിടെ",
     ta: "எப்போதும் உதவ இங்கே"
   };
+
+  const quickActions = [
+    {
+      labels: {
+        en: "Submit Complaint",
+        hi: "शिकायत दर्ज करें",
+        ml: "പരാതി സമർപ്പിക്കുക",
+        ta: "புகார் சமர்ப்பிக்கவும்"
+      },
+      icon: FileText,
+      action: () => {
+        navigate("/");
+        setIsOpen(false);
+      }
+    },
+    {
+      labels: {
+        en: "My Complaints",
+        hi: "मेरी शिकायतें",
+        ml: "എന്റെ പരാതികൾ",
+        ta: "எனது புகார்கள்"
+      },
+      icon: List,
+      action: () => {
+        navigate("/my-complaints");
+        setIsOpen(false);
+      }
+    },
+    {
+      labels: {
+        en: "View Categories",
+        hi: "श्रेणियां देखें",
+        ml: "വിഭാഗങ്ങൾ കാണുക",
+        ta: "வகைகளைக் காண்க"
+      },
+      icon: FolderOpen,
+      action: async () => {
+        const categoryInfo = language === 'en' 
+          ? "Our complaint system has the following categories:\n\n1. Academic - Course content, exams, grades\n2. Infrastructure - Buildings, classrooms, facilities\n3. Hostel - Accommodation issues\n4. Transportation - Bus services, parking\n5. Library - Books, resources, access\n6. Sports - Facilities, equipment\n7. Mess/Canteen - Food quality, service\n8. IT/Technical - Network, computers\n9. Health - Medical services\n10. Other - General complaints"
+          : language === 'hi'
+          ? "हमारी शिकायत प्रणाली में निम्नलिखित श्रेणियां हैं:\n\n1. शैक्षणिक - पाठ्यक्रम सामग्री, परीक्षा, ग्रेड\n2. बुनियादी ढांचा - भवन, कक्षाएं, सुविधाएं\n3. छात्रावास - आवास के मुद्दे\n4. परिवहन - बस सेवाएं, पार्किंग\n5. पुस्तकालय - किताबें, संसाधन, पहुंच\n6. खेल - सुविधाएं, उपकरण\n7. मेस/कैंटीन - भोजन की गुणवत्ता, सेवा\n8. IT/तकनीकी - नेटवर्क, कंप्यूटर\n9. स्वास्थ्य - चिकित्सा सेवाएं\n10. अन्य - सामान्य शिकायतें"
+          : language === 'ml'
+          ? "ഞങ്ങളുടെ പരാതി സിസ്റ്റത്തിൽ ഇനിപ്പറയുന്ന വിഭാഗങ്ങളുണ്ട്:\n\n1. അക്കാദമിക് - കോഴ്സ് ഉള്ളടക്കം, പരീക്ഷകൾ, ഗ്രേഡുകൾ\n2. അടിസ്ഥാന സൗകര്യം - കെട്ടിടങ്ങൾ, ക്ലാസ്റൂമുകൾ, സൗകര്യങ്ങൾ\n3. ഹോസ്റ്റൽ - താമസ പ്രശ്നങ്ങൾ\n4. ഗതാഗതം - ബസ് സേവനങ്ങൾ, പാർക്കിംഗ്\n5. ലൈബ്രറി - പുസ്തകങ്ങൾ, വിഭവങ്ങൾ, പ്രവേശനം\n6. കായികം - സൗകര്യങ്ങൾ, ഉപകരണങ്ങൾ\n7. മെസ്/കാന്റീൻ - ഭക്ഷണ നിലവാരം, സേവനം\n8. IT/സാങ്കേതികം - നെറ്റ്‌വർക്ക്, കമ്പ്യൂട്ടറുകൾ\n9. ആരോഗ്യം - മെഡിക്കൽ സേവനങ്ങൾ\n10. മറ്റുള്ളവ - പൊതു പരാതികൾ"
+          : "எங்கள் புகார் அமைப்பில் பின்வரும் வகைகள் உள்ளன:\n\n1. கல்வி - பாடத்திட்ட உள்ளடக்கம், தேர்வுகள், மதிப்பெண்கள்\n2. உட்கட்டமைப்பு - கட்டிடங்கள், வகுப்பறைகள், வசதிகள்\n3. விடுதி - தங்குமிட பிரச்சினைகள்\n4. போக்குவரத்து - பேருந்து சேவைகள், வாகன நிறுத்துமிடம்\n5. நூலகம் - புத்தகங்கள், வளங்கள், அணுகல்\n6. விளையாட்டு - வசதிகள், உபகரணங்கள்\n7. உணவகம் - உணவு தரம், சேவை\n8. IT/தொழில்நுட்பம் - நெட்வொர்க், கணினிகள்\n9. சுகாதாரம் - மருத்துவ சேவைகள்\n10. மற்றவை - பொதுவான புகார்கள்";
+        
+        setMessages(prev => [...prev, 
+          { role: "assistant", content: categoryInfo }
+        ]);
+        setShowQuickActions(false);
+      }
+    }
+  ];
 
   return (
     <>
@@ -201,6 +257,34 @@ export default function Chatbot() {
           {/* Messages */}
           <ScrollArea className="flex-1 p-4" ref={scrollRef}>
             <div className="space-y-4">
+              {/* Quick Actions */}
+              {showQuickActions && messages.length === 1 && (
+                <div className="mb-4 space-y-2">
+                  <p className="text-xs text-muted-foreground font-medium">
+                    {language === 'en' && "Quick Actions"}
+                    {language === 'hi' && "त्वरित क्रियाएं"}
+                    {language === 'ml' && "വേഗത്തിലുള്ള പ്രവർത്തനങ്ങൾ"}
+                    {language === 'ta' && "விரைவு செயல்கள்"}
+                  </p>
+                  <div className="grid grid-cols-1 gap-2">
+                    {quickActions.map((action, idx) => {
+                      const Icon = action.icon;
+                      return (
+                        <Button
+                          key={idx}
+                          variant="outline"
+                          className="justify-start gap-2 h-auto py-3"
+                          onClick={action.action}
+                        >
+                          <Icon className="h-4 w-4 flex-shrink-0" />
+                          <span className="text-sm">{action.labels[language] || action.labels.en}</span>
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+              
               {messages.map((message, index) => (
                 <div
                   key={index}
