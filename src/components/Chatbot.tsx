@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageCircle, X, Send, Bot, User, FileText, List, FolderOpen, Check, CheckCheck } from "lucide-react";
+import { MessageCircle, X, Send, Bot, User, FileText, List, FolderOpen, Check, CheckCheck, Mic, Square } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -37,7 +37,10 @@ export default function Chatbot() {
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
   const { toast } = useToast();
 
   // Update welcome message when language changes
@@ -176,6 +179,113 @@ export default function Chatbot() {
     setInput("");
     setShowQuickActions(false);
     await streamChat(userMessage);
+  };
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'audio/webm'
+      });
+      
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        await transcribeAudio(audioBlob);
+        
+        // Stop all tracks
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+      
+      toast({
+        title: language === 'en' ? "Recording..." : 
+               language === 'hi' ? "रिकॉर्डिंग..." :
+               language === 'ml' ? "റെക്കോർഡിംഗ്..." :
+               "பதிவு செய்கிறது...",
+        description: language === 'en' ? "Speak your question" :
+                     language === 'hi' ? "अपना सवाल बोलें" :
+                     language === 'ml' ? "നിങ്ങളുടെ ചോദ്യം പറയുക" :
+                     "உங்கள் கேள்வியைப் பேசுங்கள்",
+      });
+    } catch (error) {
+      console.error('Error accessing microphone:', error);
+      toast({
+        title: "Error",
+        description: language === 'en' ? "Could not access microphone" :
+                     language === 'hi' ? "माइक्रोफ़ोन तक पहुंच नहीं मिली" :
+                     language === 'ml' ? "മൈക്രോഫോൺ ആക്സസ് ചെയ്യാനായില്ല" :
+                     "மைக்ரோஃபோனை அணுக முடியவில்லை",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  };
+
+  const transcribeAudio = async (audioBlob: Blob) => {
+    try {
+      setIsLoading(true);
+      
+      // Convert blob to base64
+      const reader = new FileReader();
+      reader.readAsDataURL(audioBlob);
+      
+      reader.onloadend = async () => {
+        const base64Audio = (reader.result as string).split(',')[1];
+        
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/voice-to-text`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            },
+            body: JSON.stringify({ audio: base64Audio }),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to transcribe audio");
+        }
+
+        const { text } = await response.json();
+        
+        if (text && text.trim()) {
+          setInput(text);
+          setShowQuickActions(false);
+          await streamChat(text);
+        }
+      };
+    } catch (error) {
+      console.error("Transcription error:", error);
+      toast({
+        title: "Error",
+        description: language === 'en' ? "Failed to transcribe audio" :
+                     language === 'hi' ? "ऑडियो ट्रांसक्राइब करने में विफल" :
+                     language === 'ml' ? "ഓഡിയോ ട്രാൻസ്ക്രൈബ് ചെയ്യുന്നതിൽ പരാജയപ്പെട്ടു" :
+                     "ஆடியோவை எழுத முடியவில்லை",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const placeholders: Record<string, string> = {
@@ -402,10 +512,19 @@ export default function Chatbot() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder={placeholders[language] || placeholders.en}
-                disabled={isLoading}
+                disabled={isLoading || isRecording}
                 className="flex-1"
               />
-              <Button type="submit" size="icon" disabled={isLoading || !input.trim()}>
+              <Button 
+                type="button"
+                size="icon" 
+                variant={isRecording ? "destructive" : "secondary"}
+                onClick={isRecording ? stopRecording : startRecording}
+                disabled={isLoading}
+              >
+                {isRecording ? <Square className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+              </Button>
+              <Button type="submit" size="icon" disabled={isLoading || !input.trim() || isRecording}>
                 <Send className="h-4 w-4" />
               </Button>
             </div>
