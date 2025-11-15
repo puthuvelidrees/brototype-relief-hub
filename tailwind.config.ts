@@ -88,10 +88,30 @@ export default {
             height: "0",
           },
         },
+        "strength-fill": {
+          "0%": {
+            transform: "scaleX(0)",
+            opacity: "0",
+          },
+          "100%": {
+            transform: "scaleX(1)",
+            opacity: "1",
+          },
+        },
+        "pulse-glow": {
+          "0%, 100%": {
+            boxShadow: "0 0 8px hsl(var(--success) / 0.4)",
+          },
+          "50%": {
+            boxShadow: "0 0 16px hsl(var(--success) / 0.6)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "strength-fill": "strength-fill 0.3s ease-out forwards",
+        "pulse-glow": "pulse-glow 2s ease-in-out infinite",
       },
     },
   },

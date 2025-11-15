@@ -65,13 +65,15 @@ const checkPasswordRequirements = (password: string): PasswordRequirements => {
 };
 
 const RequirementItem = ({ met, text }: { met: boolean; text: string }) => (
-  <div className="flex items-center gap-2 text-xs">
-    {met ? (
-      <Check className="h-4 w-4 text-success" />
-    ) : (
-      <X className="h-4 w-4 text-muted-foreground" />
-    )}
-    <span className={met ? "text-success" : "text-muted-foreground"}>
+  <div className="flex items-center gap-2 text-xs transition-all duration-300">
+    <div className={`transition-all duration-300 ${met ? "scale-100 rotate-0" : "scale-90 opacity-70"}`}>
+      {met ? (
+        <Check className="h-4 w-4 text-success transition-all duration-300" />
+      ) : (
+        <X className="h-4 w-4 text-muted-foreground transition-all duration-300" />
+      )}
+    </div>
+    <span className={`transition-all duration-300 ${met ? "text-success font-medium" : "text-muted-foreground"}`}>
       {text}
     </span>
   </div>
@@ -521,23 +523,23 @@ export default function Auth() {
                     </button>
                   </div>
                   {passwordStrength && (
-                    <div className="space-y-2 mt-3">
+                    <div className="space-y-2 mt-3 animate-fade-in">
                       <div className="flex gap-1 mb-2">
-                        <div className={`h-1 flex-1 rounded-full transition-colors ${
-                          passwordStrength === "weak" ? "bg-destructive" : 
-                          passwordStrength === "medium" ? "bg-warning" : 
-                          "bg-success"
+                        <div className={`h-1.5 flex-1 rounded-full origin-left transition-all duration-500 ease-out ${
+                          passwordStrength === "weak" ? "bg-destructive scale-x-100 animate-strength-fill" : 
+                          passwordStrength === "medium" ? "bg-warning scale-x-100 animate-strength-fill" : 
+                          "bg-success scale-x-100 animate-strength-fill"
+                        } ${passwordStrength === "strong" ? "animate-pulse-glow" : ""}`} />
+                        <div className={`h-1.5 flex-1 rounded-full origin-left transition-all duration-500 ease-out delay-75 ${
+                          passwordStrength === "medium" ? "bg-warning scale-x-100 animate-strength-fill" : 
+                          passwordStrength === "strong" ? "bg-success scale-x-100 animate-strength-fill" : 
+                          "bg-muted/30 scale-x-0"
                         }`} />
-                        <div className={`h-1 flex-1 rounded-full transition-colors ${
-                          passwordStrength === "medium" ? "bg-warning" : 
-                          passwordStrength === "strong" ? "bg-success" : 
-                          "bg-muted"
-                        }`} />
-                        <div className={`h-1 flex-1 rounded-full transition-colors ${
-                          passwordStrength === "strong" ? "bg-success" : "bg-muted"
+                        <div className={`h-1.5 flex-1 rounded-full origin-left transition-all duration-500 ease-out delay-150 ${
+                          passwordStrength === "strong" ? "bg-success scale-x-100 animate-strength-fill" : "bg-muted/30 scale-x-0"
                         }`} />
                       </div>
-                      <div className="space-y-1">
+                      <div className="space-y-1 transition-all duration-300">
                         <RequirementItem 
                           met={passwordRequirements.minLength} 
                           text="At least 12 characters" 
