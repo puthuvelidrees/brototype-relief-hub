@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useRealtimeNotifications } from "@/hooks/useRealtimeNotifications";
 import Navbar from "@/components/Navbar";
+import AdminAvailabilityToggle from "@/components/AdminAvailabilityToggle";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -26,6 +27,7 @@ export default function AdminSettings() {
   
   // System Preferences
   const [autoAssignComplaints, setAutoAssignComplaints] = useState(false);
+  const [assignmentMethod, setAssignmentMethod] = useState("workload");
   const [requireApproval, setRequireApproval] = useState(false);
   const [maxComplaintsPerDay, setMaxComplaintsPerDay] = useState("10");
   const [defaultComplaintStatus, setDefaultComplaintStatus] = useState("pending");
@@ -137,6 +139,7 @@ export default function AdminSettings() {
 
       if (data) {
         setAutoAssignComplaints(data.auto_assign_complaints);
+        setAssignmentMethod(data.assignment_method || "workload");
         setRequireApproval(data.require_approval);
         setMaxComplaintsPerDay(String(data.max_complaints_per_day));
         setDefaultComplaintStatus(data.default_complaint_status);
@@ -171,6 +174,7 @@ export default function AdminSettings() {
       const settingsData = {
         user_id: user.id,
         auto_assign_complaints: autoAssignComplaints,
+        assignment_method: assignmentMethod,
         require_approval: requireApproval,
         max_complaints_per_day: parseInt(maxComplaintsPerDay),
         default_complaint_status: defaultComplaintStatus,
@@ -241,6 +245,8 @@ export default function AdminSettings() {
             </p>
           </div>
 
+          <AdminAvailabilityToggle />
+
           {/* System Preferences */}
           <Card>
             <CardHeader>
@@ -266,6 +272,27 @@ export default function AdminSettings() {
                   onCheckedChange={setAutoAssignComplaints}
                 />
               </div>
+
+              {autoAssignComplaints && (
+                <>
+                  <div className="space-y-2 pl-4 border-l-2 border-muted">
+                    <Label htmlFor="assignment-method">Assignment method</Label>
+                    <Select value={assignmentMethod} onValueChange={setAssignmentMethod}>
+                      <SelectTrigger className="max-w-[250px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-popover z-50">
+                        <SelectItem value="workload">Workload-based (Least busy admin)</SelectItem>
+                        <SelectItem value="round_robin">Round-robin (Rotate equally)</SelectItem>
+                        <SelectItem value="manual">Manual (No auto-assignment)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-sm text-muted-foreground">
+                      Choose how complaints are distributed among admins
+                    </p>
+                  </div>
+                </>
+              )}
 
               <Separator />
 
