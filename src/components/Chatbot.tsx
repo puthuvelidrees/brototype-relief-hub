@@ -397,9 +397,9 @@ export default function Chatbot() {
                   </div>
                   <div className="rounded-lg px-4 py-3 bg-muted/80 backdrop-blur-sm border border-border/50 shadow-sm">
                     <div className="flex gap-1.5 items-center mb-2">
-                      <div className="w-2.5 h-2.5 rounded-full bg-primary animate-bounce" />
-                      <div className="w-2.5 h-2.5 rounded-full bg-primary animate-bounce [animation-delay:0.15s]" />
-                      <div className="w-2.5 h-2.5 rounded-full bg-primary animate-bounce [animation-delay:0.3s]" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-primary animate-typing-dot" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-primary animate-typing-dot [animation-delay:0.2s]" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-primary animate-typing-dot [animation-delay:0.4s]" />
                     </div>
                     <p className="text-xs text-muted-foreground font-medium">
                       {typingTexts[language] || typingTexts.en}

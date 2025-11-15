@@ -163,6 +163,16 @@ export default {
             opacity: "0.3",
           },
         },
+        "typing-dot": {
+          "0%, 60%, 100%": {
+            transform: "translateY(0)",
+            opacity: "0.4",
+          },
+          "30%": {
+            transform: "translateY(-10px)",
+            opacity: "1",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -174,6 +184,7 @@ export default {
         "bounce-in": "bounce-in 0.5s ease-out",
         "float": "float 3s ease-in-out infinite",
         "blink": "blink 5s ease-in-out infinite",
+        "typing-dot": "typing-dot 1.4s ease-in-out infinite",
       },
     },
   },
