@@ -30,7 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event, 'Session:', !!session);
+        console.log('🔐 Auth state changed:', event, 'User:', session?.user?.email);
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -43,18 +43,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         // Check admin role with setTimeout to prevent deadlock
         if (session?.user) {
+          console.log('⏳ Checking admin role for:', session.user.email);
           setTimeout(async () => {
-            const { data } = await supabase
+            const { data, error } = await supabase
               .from("user_roles")
               .select("role")
               .eq("user_id", session.user.id)
               .eq("role", "admin")
               .maybeSingle();
-            console.log('Admin check result:', { userId: session.user.id, isAdmin: !!data });
+            
+            if (error) {
+              console.error('❌ Error checking admin role:', error);
+            }
+            
+            console.log('✅ Admin check complete:', { 
+              userId: session.user.id, 
+              email: session.user.email,
+              isAdmin: !!data,
+              data 
+            });
             setIsAdmin(!!data);
             setLoading(false);
           }, 0);
         } else {
+          console.log('👤 No user session');
           setIsAdmin(false);
           setLoading(false);
         }
@@ -63,19 +75,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session check:', !!session);
+      console.log('🔍 Initial session check:', session?.user?.email || 'No session');
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
+        console.log('⏳ Checking admin role for initial session:', session.user.email);
         setTimeout(async () => {
-          const { data } = await supabase
+          const { data, error } = await supabase
             .from("user_roles")
             .select("role")
             .eq("user_id", session.user.id)
             .eq("role", "admin")
             .maybeSingle();
-          console.log('Initial admin check result:', { userId: session.user.id, isAdmin: !!data });
+          
+          if (error) {
+            console.error('❌ Error checking admin role:', error);
+          }
+          
+          console.log('✅ Initial admin check complete:', { 
+            userId: session.user.id,
+            email: session.user.email, 
+            isAdmin: !!data,
+            data 
+          });
           setIsAdmin(!!data);
           setLoading(false);
         }, 0);

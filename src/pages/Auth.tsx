@@ -181,12 +181,12 @@ export default function Auth() {
 
   useEffect(() => {
     console.log('Auth redirect check:', { loading, user: !!user, isAdmin, isPasswordRecovery });
+    // Only redirect after loading is complete AND admin check is done
     if (!loading && user && !isPasswordRecovery) {
+      console.log('Redirecting based on role:', isAdmin ? 'admin' : 'student');
       if (isAdmin) {
-        console.log('Redirecting to /admin');
         navigate("/admin");
       } else {
-        console.log('Redirecting to /');
         navigate("/");
       }
     }
