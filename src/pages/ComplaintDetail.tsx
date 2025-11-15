@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import CommentsSection from "@/components/CommentsSection";
+import ComplaintTimeline from "@/components/ComplaintTimeline";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -261,6 +262,8 @@ export default function ComplaintDetail() {
               )}
             </CardContent>
           </Card>
+
+          <ComplaintTimeline complaintId={complaint.id} />
 
           <CommentsSection complaintId={complaint.id} />
         </div>
