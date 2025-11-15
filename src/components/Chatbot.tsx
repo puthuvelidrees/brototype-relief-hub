@@ -22,6 +22,7 @@ export default function Chatbot() {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(true);
+  const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
   
   const welcomeMessages: Record<string, string> = {
     en: "Hi! I'm here to help you with the complaint process. Ask me anything about submitting complaints, tracking them, or understanding the system.",
@@ -156,6 +157,11 @@ export default function Chatbot() {
           ? { ...msg, status: "read" as const } 
           : msg
       ));
+      
+      // Mark as unread if chat is closed
+      if (!isOpen) {
+        setHasUnreadMessages(true);
+      }
     } catch (error) {
       console.error("Chat error:", error);
       toast({
@@ -255,6 +261,11 @@ export default function Chatbot() {
           { role: "assistant", content: categoryInfo }
         ]);
         setShowQuickActions(false);
+        
+        // Mark as unread if chat is closed
+        if (!isOpen) {
+          setHasUnreadMessages(true);
+        }
       }
     }
   ];
@@ -264,11 +275,23 @@ export default function Chatbot() {
       {/* Floating Chat Button */}
       {!isOpen && (
         <Button
-          onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-50"
+          onClick={() => {
+            setIsOpen(true);
+            setHasUnreadMessages(false);
+          }}
+          className={cn(
+            "fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-50 relative",
+            hasUnreadMessages && "animate-pulse-glow"
+          )}
           size="icon"
         >
           <MessageCircle className="h-6 w-6" />
+          {hasUnreadMessages && (
+            <span className="absolute -top-1 -right-1 h-4 w-4 bg-destructive rounded-full animate-ping" />
+          )}
+          {hasUnreadMessages && (
+            <span className="absolute -top-1 -right-1 h-4 w-4 bg-destructive rounded-full" />
+          )}
         </Button>
       )}
 
