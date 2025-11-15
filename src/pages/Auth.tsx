@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
+import { Check, X } from "lucide-react";
 
 const signUpSchema = z.object({
   email: z.string().trim().email("Invalid email address"),
@@ -29,6 +30,14 @@ const signInSchema = z.object({
 
 type PasswordStrength = "weak" | "medium" | "strong" | null;
 
+interface PasswordRequirements {
+  minLength: boolean;
+  hasUppercase: boolean;
+  hasLowercase: boolean;
+  hasNumber: boolean;
+  hasSpecialChar: boolean;
+}
+
 const calculatePasswordStrength = (password: string): PasswordStrength => {
   if (!password) return null;
   
@@ -45,10 +54,40 @@ const calculatePasswordStrength = (password: string): PasswordStrength => {
   return "strong";
 };
 
+const checkPasswordRequirements = (password: string): PasswordRequirements => {
+  return {
+    minLength: password.length >= 12,
+    hasUppercase: /[A-Z]/.test(password),
+    hasLowercase: /[a-z]/.test(password),
+    hasNumber: /[0-9]/.test(password),
+    hasSpecialChar: /[^A-Za-z0-9]/.test(password),
+  };
+};
+
+const RequirementItem = ({ met, text }: { met: boolean; text: string }) => (
+  <div className="flex items-center gap-2 text-xs">
+    {met ? (
+      <Check className="h-4 w-4 text-success" />
+    ) : (
+      <X className="h-4 w-4 text-muted-foreground" />
+    )}
+    <span className={met ? "text-success" : "text-muted-foreground"}>
+      {text}
+    </span>
+  </div>
+);
+
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const [showResetForm, setShowResetForm] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState<PasswordStrength>(null);
+  const [passwordRequirements, setPasswordRequirements] = useState<PasswordRequirements>({
+    minLength: false,
+    hasUppercase: false,
+    hasLowercase: false,
+    hasNumber: false,
+    hasSpecialChar: false,
+  });
   const { user, isAdmin, loading, signUp, signIn, resetPassword, updatePassword, isPasswordRecovery } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();
@@ -415,11 +454,15 @@ export default function Auth() {
                     type="password"
                     placeholder="At least 12 characters"
                     required
-                    onChange={(e) => setPasswordStrength(calculatePasswordStrength(e.target.value))}
+                    onChange={(e) => {
+                      const password = e.target.value;
+                      setPasswordStrength(calculatePasswordStrength(password));
+                      setPasswordRequirements(checkPasswordRequirements(password));
+                    }}
                   />
                   {passwordStrength && (
-                    <div className="space-y-1">
-                      <div className="flex gap-1">
+                    <div className="space-y-2 mt-3">
+                      <div className="flex gap-1 mb-2">
                         <div className={`h-1 flex-1 rounded-full transition-colors ${
                           passwordStrength === "weak" ? "bg-destructive" : 
                           passwordStrength === "medium" ? "bg-warning" : 
@@ -434,15 +477,28 @@ export default function Auth() {
                           passwordStrength === "strong" ? "bg-success" : "bg-muted"
                         }`} />
                       </div>
-                      <p className={`text-xs font-medium ${
-                        passwordStrength === "weak" ? "text-destructive" : 
-                        passwordStrength === "medium" ? "text-warning" : 
-                        "text-success"
-                      }`}>
-                        {passwordStrength === "weak" && "Weak - Add more characters and variety"}
-                        {passwordStrength === "medium" && "Medium - Getting better"}
-                        {passwordStrength === "strong" && "Strong - Excellent password!"}
-                      </p>
+                      <div className="space-y-1">
+                        <RequirementItem 
+                          met={passwordRequirements.minLength} 
+                          text="At least 12 characters" 
+                        />
+                        <RequirementItem 
+                          met={passwordRequirements.hasUppercase} 
+                          text="One uppercase letter (A-Z)" 
+                        />
+                        <RequirementItem 
+                          met={passwordRequirements.hasLowercase} 
+                          text="One lowercase letter (a-z)" 
+                        />
+                        <RequirementItem 
+                          met={passwordRequirements.hasNumber} 
+                          text="One number (0-9)" 
+                        />
+                        <RequirementItem 
+                          met={passwordRequirements.hasSpecialChar} 
+                          text="One special character (!@#$%...)" 
+                        />
+                      </div>
                     </div>
                   )}
                 </div>
