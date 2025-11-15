@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
-import { Check, X } from "lucide-react";
+import { Check, X, Eye, EyeOff } from "lucide-react";
 
 const signUpSchema = z.object({
   email: z.string().trim().email("Invalid email address"),
@@ -88,6 +88,10 @@ export default function Auth() {
     hasNumber: false,
     hasSpecialChar: false,
   });
+  const [showSignInPassword, setShowSignInPassword] = useState(false);
+  const [showSignUpPassword, setShowSignUpPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { user, isAdmin, loading, signUp, signIn, resetPassword, updatePassword, isPasswordRecovery } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();
@@ -303,23 +307,51 @@ export default function Auth() {
             <form onSubmit={handleUpdatePassword} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="newPassword">New Password</Label>
-                <Input
-                  id="newPassword"
-                  name="newPassword"
-                  type="password"
-                  placeholder="At least 6 characters"
-                  required
-                />
+                <div className="relative">
+                  <Input
+                    id="newPassword"
+                    name="newPassword"
+                    type={showNewPassword ? "text" : "password"}
+                    placeholder="At least 6 characters"
+                    required
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {showNewPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirm Password</Label>
-                <Input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  placeholder="Re-enter your password"
-                  required
-                />
+                <div className="relative">
+                  <Input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Re-enter your password"
+                    required
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Updating..." : "Update Password"}
@@ -362,13 +394,27 @@ export default function Auth() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signinPassword">{t.password}</Label>
-                    <Input
-                      id="signinPassword"
-                      name="signinPassword"
-                      type="password"
-                      placeholder="••••••"
-                      required
-                    />
+                    <div className="relative">
+                      <Input
+                        id="signinPassword"
+                        name="signinPassword"
+                        type={showSignInPassword ? "text" : "password"}
+                        placeholder="••••••"
+                        required
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowSignInPassword(!showSignInPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        {showSignInPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
                   </div>
                   <div className="flex justify-end">
                     <Button
@@ -448,18 +494,32 @@ export default function Auth() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signupPassword">{t.password}</Label>
-                  <Input
-                    id="signupPassword"
-                    name="signupPassword"
-                    type="password"
-                    placeholder="At least 12 characters"
-                    required
-                    onChange={(e) => {
-                      const password = e.target.value;
-                      setPasswordStrength(calculatePasswordStrength(password));
-                      setPasswordRequirements(checkPasswordRequirements(password));
-                    }}
-                  />
+                  <div className="relative">
+                    <Input
+                      id="signupPassword"
+                      name="signupPassword"
+                      type={showSignUpPassword ? "text" : "password"}
+                      placeholder="At least 12 characters"
+                      required
+                      className="pr-10"
+                      onChange={(e) => {
+                        const password = e.target.value;
+                        setPasswordStrength(calculatePasswordStrength(password));
+                        setPasswordRequirements(checkPasswordRequirements(password));
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowSignUpPassword(!showSignUpPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showSignUpPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
                   {passwordStrength && (
                     <div className="space-y-2 mt-3">
                       <div className="flex gap-1 mb-2">
