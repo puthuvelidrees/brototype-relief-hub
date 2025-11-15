@@ -26,6 +26,7 @@ import { format } from "date-fns";
 import ExportDialog from "@/components/ExportDialog";
 import SLAIndicator from "@/components/SLAIndicator";
 import EscalationBadge from "@/components/EscalationBadge";
+import ActivityBadge from "@/components/ActivityBadge";
 
 const iconMap: Record<string, any> = {
   Building2, GraduationCap, Home, Bus, BookOpen, Trophy, Utensils, Laptop, Heart, MoreHorizontal
@@ -506,6 +507,7 @@ export default function AdminDashboard() {
                             escalatedAt={complaint.escalated_at}
                             escalationReason={complaint.escalation_reason}
                           />
+                          <ActivityBadge complaintId={complaint.id} />
                         </div>
                         
                         {/* SLA Indicators */}
