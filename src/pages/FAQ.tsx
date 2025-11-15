@@ -78,10 +78,10 @@ export default function FAQ() {
               {t.contactSupport}
             </p>
             <a 
-              href="tel:+911234567890" 
+              href="tel:+918714124666" 
               className="text-primary hover:underline font-medium"
             >
-              +91 123 456 7890
+              +91 8714 124 666
             </a>
           </Card>
         </div>

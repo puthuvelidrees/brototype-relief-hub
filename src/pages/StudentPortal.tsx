@@ -31,7 +31,7 @@ export default function StudentPortal() {
   if (!user) return null;
 
   const handleEmergencyCall = () => {
-    window.location.href = "tel:+911234567890";
+    window.location.href = "tel:+918714124666";
   };
 
   return (
