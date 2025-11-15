@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { Settings, Bell, Mail, Clock, Save, Loader2, Activity, User, FileText, Volume2 } from "lucide-react";
+import { Settings, Bell, Mail, Clock, Save, Loader2, Activity, User, FileText, Volume2, TrendingUp } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 
@@ -51,6 +51,13 @@ export default function AdminSettings() {
   const [slaResolutionTimeHours, setSlaResolutionTimeHours] = useState("72");
   const [slaCriticalResponseHours, setSlaCriticalResponseHours] = useState("4");
   const [slaCriticalResolutionHours, setSlaCriticalResolutionHours] = useState("24");
+  
+  // Escalation Settings
+  const [escalationEnabled, setEscalationEnabled] = useState(true);
+  const [escalationSlaBreachAuto, setEscalationSlaBreachAuto] = useState(true);
+  const [escalationUnresolvedHours, setEscalationUnresolvedHours] = useState("48");
+  const [escalationMaxLevel, setEscalationMaxLevel] = useState("3");
+  const [escalationAutoPriority, setEscalationAutoPriority] = useState(true);
   
   // Activity Logs
   const [activityLogs, setActivityLogs] = useState<any[]>([]);
@@ -163,6 +170,11 @@ export default function AdminSettings() {
         setSlaResolutionTimeHours(String(data.sla_resolution_time_hours ?? 72));
         setSlaCriticalResponseHours(String(data.sla_critical_response_hours ?? 4));
         setSlaCriticalResolutionHours(String(data.sla_critical_resolution_hours ?? 24));
+        setEscalationEnabled(data.escalation_enabled ?? true);
+        setEscalationSlaBreachAuto(data.escalation_sla_breach_auto ?? true);
+        setEscalationUnresolvedHours(String(data.escalation_unresolved_hours ?? 48));
+        setEscalationMaxLevel(String(data.escalation_max_level ?? 3));
+        setEscalationAutoPriority(data.escalation_auto_priority ?? true);
         if (data.notification_email) {
           setNotificationEmail(data.notification_email);
         }
@@ -204,6 +216,11 @@ export default function AdminSettings() {
         sla_resolution_time_hours: parseInt(slaResolutionTimeHours),
         sla_critical_response_hours: parseInt(slaCriticalResponseHours),
         sla_critical_resolution_hours: parseInt(slaCriticalResolutionHours),
+        escalation_enabled: escalationEnabled,
+        escalation_sla_breach_auto: escalationSlaBreachAuto,
+        escalation_unresolved_hours: parseInt(escalationUnresolvedHours),
+        escalation_max_level: parseInt(escalationMaxLevel),
+        escalation_auto_priority: escalationAutoPriority,
       };
 
       const { error } = await supabase
@@ -652,6 +669,117 @@ export default function AdminSettings() {
                   Notifications will be sent to assigned admins when SLA thresholds are breached. 
                   Visual indicators will appear on complaints approaching or exceeding SLA targets.
                 </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Escalation Configuration */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5" />
+                Complaint Escalation Workflow
+              </CardTitle>
+              <CardDescription>
+                Configure automatic escalation for unresolved complaints and SLA breaches
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="escalation-enabled" className="flex items-center gap-2">
+                    <Activity className="h-4 w-4" />
+                    Enable escalation workflow
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Automatically escalate complaints based on rules
+                  </p>
+                </div>
+                <Switch
+                  id="escalation-enabled"
+                  checked={escalationEnabled}
+                  onCheckedChange={setEscalationEnabled}
+                />
+              </div>
+
+              <Separator />
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="escalation-sla-auto">Auto-escalate on SLA breach</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Automatically escalate when response or resolution SLA is breached
+                  </p>
+                </div>
+                <Switch
+                  id="escalation-sla-auto"
+                  checked={escalationSlaBreachAuto}
+                  onCheckedChange={setEscalationSlaBreachAuto}
+                  disabled={!escalationEnabled}
+                />
+              </div>
+
+              <Separator />
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="escalation-auto-priority">Auto-increase priority</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Automatically increase priority level when escalating complaints
+                  </p>
+                </div>
+                <Switch
+                  id="escalation-auto-priority"
+                  checked={escalationAutoPriority}
+                  onCheckedChange={setEscalationAutoPriority}
+                  disabled={!escalationEnabled}
+                />
+              </div>
+
+              <Separator />
+
+              <div className="grid gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="escalation-unresolved">Unresolved escalation threshold (hours)</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Escalate if complaint remains unresolved for this many hours
+                  </p>
+                  <Input
+                    id="escalation-unresolved"
+                    type="number"
+                    value={escalationUnresolvedHours}
+                    onChange={(e) => setEscalationUnresolvedHours(e.target.value)}
+                    disabled={!escalationEnabled}
+                    min="1"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="escalation-max-level">Maximum escalation level</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Maximum number of times a complaint can be escalated
+                  </p>
+                  <Input
+                    id="escalation-max-level"
+                    type="number"
+                    value={escalationMaxLevel}
+                    onChange={(e) => setEscalationMaxLevel(e.target.value)}
+                    disabled={!escalationEnabled}
+                    min="1"
+                    max="5"
+                  />
+                </div>
+              </div>
+
+              <div className="rounded-lg bg-muted p-4 space-y-2">
+                <p className="text-sm font-medium">Escalation Workflow</p>
+                <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                  <li>Complaints are automatically escalated when SLA is breached or unresolved for too long</li>
+                  <li>Escalated complaints are reassigned to senior admins with lowest workload</li>
+                  <li>Priority is automatically increased if enabled (Low → Medium → High → Critical)</li>
+                  <li>All senior admins receive notifications about escalated complaints</li>
+                  <li>Escalation stops after reaching the maximum level</li>
+                </ul>
               </div>
             </CardContent>
           </Card>
