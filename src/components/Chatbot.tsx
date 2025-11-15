@@ -23,7 +23,17 @@ export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(true);
   const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
-  const [position, setPosition] = useState({ x: window.innerWidth - 120, y: window.innerHeight - 120 });
+  const [position, setPosition] = useState(() => {
+    const saved = localStorage.getItem('chatbot-position');
+    if (saved) {
+      return JSON.parse(saved);
+    }
+    // Default to bottom-right corner
+    return { 
+      x: window.innerWidth - 140, 
+      y: window.innerHeight - 140 
+    };
+  });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [showHint, setShowHint] = useState(() => {
@@ -95,10 +105,13 @@ export default function Chatbot() {
       const maxX = window.innerWidth - (isOpen ? 380 : 80);
       const maxY = window.innerHeight - (isOpen ? 600 : 80);
       
-      setPosition({
+      const newPosition = {
         x: Math.max(0, Math.min(newX, maxX)),
         y: Math.max(0, Math.min(newY, maxY))
-      });
+      };
+      
+      setPosition(newPosition);
+      localStorage.setItem('chatbot-position', JSON.stringify(newPosition));
     };
 
     const handleMouseUp = () => {
