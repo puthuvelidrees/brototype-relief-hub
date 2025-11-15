@@ -280,12 +280,12 @@ export default function Chatbot() {
             setHasUnreadMessages(false);
           }}
           className={cn(
-            "fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-50 relative",
+            "fixed bottom-6 right-4 h-16 w-16 rounded-full shadow-2xl z-50 relative ring-2 ring-primary/20",
             hasUnreadMessages && "animate-pulse-glow"
           )}
           size="icon"
         >
-          <MessageCircle className="h-6 w-6" />
+          <MessageCircle className="h-7 w-7" />
           {hasUnreadMessages && (
             <span className="absolute -top-1 -right-1 h-4 w-4 bg-destructive rounded-full animate-ping" />
           )}
