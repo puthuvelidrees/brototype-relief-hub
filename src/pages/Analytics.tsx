@@ -21,7 +21,7 @@ import {
   Legend, 
   ResponsiveContainer 
 } from "recharts";
-import { TrendingUp, Activity, CheckCircle, Users } from "lucide-react";
+import { TrendingUp, Activity, CheckCircle, Users, Clock, AlertTriangle } from "lucide-react";
 import { format, subDays, startOfDay, endOfDay } from "date-fns";
 
 interface Complaint {
@@ -30,6 +30,9 @@ interface Complaint {
   priority: string;
   created_at: string;
   resolved_at: string | null;
+  first_response_at: string | null;
+  sla_response_breached: boolean;
+  sla_resolution_breached: boolean;
   assigned_to: string | null;
   categories: { name: string } | null;
 }
@@ -74,7 +77,7 @@ export default function Analytics() {
       // Fetch complaints
       const { data: complaintsData, error: complaintsError } = await supabase
         .from("complaints")
-        .select("id, status, priority, created_at, resolved_at, assigned_to, categories(name)")
+        .select("id, status, priority, created_at, resolved_at, first_response_at, sla_response_breached, sla_resolution_breached, assigned_to, categories(name)")
         .gte("created_at", startDate.toISOString())
         .order("created_at", { ascending: true });
 
@@ -207,6 +210,12 @@ export default function Analytics() {
     avgResolutionRate: complaints.length > 0 
       ? Math.round((complaints.filter((c) => c.status === "resolved").length / complaints.length) * 100) 
       : 0,
+    slaResponseMet: complaints.length > 0
+      ? Math.round((complaints.filter((c) => !c.sla_response_breached).length / complaints.length) * 100)
+      : 0,
+    slaResolutionMet: complaints.length > 0
+      ? Math.round((complaints.filter((c) => !c.sla_resolution_breached).length / complaints.length) * 100)
+      : 0,
   };
 
   return (
@@ -273,6 +282,34 @@ export default function Analytics() {
               <CardContent>
                 <div className="text-2xl font-bold">{adminPerformance.length}</div>
                 <p className="text-xs text-muted-foreground">Handling complaints</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* SLA Performance Cards */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Response SLA Compliance</CardTitle>
+                <Clock className="h-4 w-4 text-primary" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.slaResponseMet}%</div>
+                <p className="text-xs text-muted-foreground">
+                  {complaints.filter(c => !c.sla_response_breached).length} of {stats.total} within SLA
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Resolution SLA Compliance</CardTitle>
+                <AlertTriangle className="h-4 w-4 text-warning" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.slaResolutionMet}%</div>
+                <p className="text-xs text-muted-foreground">
+                  {complaints.filter(c => !c.sla_resolution_breached).length} of {stats.total} within SLA
+                </p>
               </CardContent>
             </Card>
           </div>

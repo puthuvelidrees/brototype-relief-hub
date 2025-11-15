@@ -24,6 +24,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Search, ExternalLink, CheckCircle, Calendar, MapPin, Phone, User, Building2, GraduationCap, Home, Bus, BookOpen, Trophy, Utensils, Laptop, Heart, MoreHorizontal, Filter, CheckSquare, Square, Download } from "lucide-react";
 import { format } from "date-fns";
 import ExportDialog from "@/components/ExportDialog";
+import SLAIndicator from "@/components/SLAIndicator";
 
 const iconMap: Record<string, any> = {
   Building2, GraduationCap, Home, Bus, BookOpen, Trophy, Utensils, Laptop, Heart, MoreHorizontal
@@ -49,6 +50,10 @@ interface Complaint {
   priority: "low" | "medium" | "high" | "critical";
   file_url: string | null;
   created_at: string;
+  first_response_at: string | null;
+  resolved_at: string | null;
+  sla_response_breached: boolean;
+  sla_resolution_breached: boolean;
   assigned_to: string | null;
   assigned_admin?: {
     full_name: string | null;
@@ -81,6 +86,7 @@ export default function AdminDashboard() {
   const [bulkAction, setBulkAction] = useState<"status" | "priority" | null>(null);
   const [bulkValue, setBulkValue] = useState<string>("");
   const [showExportDialog, setShowExportDialog] = useState(false);
+  const [slaSettings, setSlaSettings] = useState<any>(null);
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {
@@ -153,6 +159,17 @@ export default function AdminDashboard() {
   }, [search, selectedCategory, selectedPriority, complaints]);
 
   const fetchComplaints = async () => {
+    // Fetch SLA settings
+    const { data: slaData } = await supabase
+      .from("admin_settings")
+      .select("sla_enabled, sla_response_time_hours, sla_resolution_time_hours, sla_critical_response_hours, sla_critical_resolution_hours")
+      .limit(1)
+      .maybeSingle();
+    
+    if (slaData) {
+      setSlaSettings(slaData);
+    }
+
     const { data: complaintsData, error: complaintsError } = await supabase
       .from("complaints")
       .select(`
@@ -481,6 +498,21 @@ export default function AdminDashboard() {
                             </Badge>
                           )}
                         </div>
+                        
+                        {/* SLA Indicators */}
+                        {slaSettings && slaSettings.sla_enabled && (
+                          <SLAIndicator
+                            createdAt={complaint.created_at}
+                            firstResponseAt={complaint.first_response_at}
+                            resolvedAt={complaint.resolved_at}
+                            status={complaint.status}
+                            priority={complaint.priority}
+                            slaResponseBreached={complaint.sla_response_breached}
+                            slaResolutionBreached={complaint.sla_resolution_breached}
+                            slaSettings={slaSettings}
+                          />
+                        )}
+                        
                         <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <User className="h-4 w-4" />

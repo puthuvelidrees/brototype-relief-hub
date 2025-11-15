@@ -91,6 +91,11 @@ export type Database = {
           realtime_notifications: boolean | null
           realtime_status_change: boolean | null
           require_approval: boolean | null
+          sla_critical_resolution_hours: number | null
+          sla_critical_response_hours: number | null
+          sla_enabled: boolean | null
+          sla_resolution_time_hours: number | null
+          sla_response_time_hours: number | null
           status_change_notification: boolean | null
           updated_at: string | null
           user_id: string
@@ -111,6 +116,11 @@ export type Database = {
           realtime_notifications?: boolean | null
           realtime_status_change?: boolean | null
           require_approval?: boolean | null
+          sla_critical_resolution_hours?: number | null
+          sla_critical_response_hours?: number | null
+          sla_enabled?: boolean | null
+          sla_resolution_time_hours?: number | null
+          sla_response_time_hours?: number | null
           status_change_notification?: boolean | null
           updated_at?: string | null
           user_id: string
@@ -131,6 +141,11 @@ export type Database = {
           realtime_notifications?: boolean | null
           realtime_status_change?: boolean | null
           require_approval?: boolean | null
+          sla_critical_resolution_hours?: number | null
+          sla_critical_response_hours?: number | null
+          sla_enabled?: boolean | null
+          sla_resolution_time_hours?: number | null
+          sla_response_time_hours?: number | null
           status_change_notification?: boolean | null
           updated_at?: string | null
           user_id?: string
@@ -202,11 +217,14 @@ export type Database = {
           domain_id: string | null
           file_type: string | null
           file_url: string | null
+          first_response_at: string | null
           id: string
           location_id: string
           mobile: string
           priority: Database["public"]["Enums"]["complaint_priority"]
           resolved_at: string | null
+          sla_resolution_breached: boolean | null
+          sla_response_breached: boolean | null
           status: Database["public"]["Enums"]["complaint_status"] | null
           student_name: string
           ticket_id: string
@@ -221,11 +239,14 @@ export type Database = {
           domain_id?: string | null
           file_type?: string | null
           file_url?: string | null
+          first_response_at?: string | null
           id?: string
           location_id: string
           mobile: string
           priority?: Database["public"]["Enums"]["complaint_priority"]
           resolved_at?: string | null
+          sla_resolution_breached?: boolean | null
+          sla_response_breached?: boolean | null
           status?: Database["public"]["Enums"]["complaint_status"] | null
           student_name: string
           ticket_id: string
@@ -240,11 +261,14 @@ export type Database = {
           domain_id?: string | null
           file_type?: string | null
           file_url?: string | null
+          first_response_at?: string | null
           id?: string
           location_id?: string
           mobile?: string
           priority?: Database["public"]["Enums"]["complaint_priority"]
           resolved_at?: string | null
+          sla_resolution_breached?: boolean | null
+          sla_response_breached?: boolean | null
           status?: Database["public"]["Enums"]["complaint_status"] | null
           student_name?: string
           ticket_id?: string

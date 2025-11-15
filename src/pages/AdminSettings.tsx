@@ -45,6 +45,13 @@ export default function AdminSettings() {
   const [realtimeStatusChange, setRealtimeStatusChange] = useState(true);
   const [notificationSound, setNotificationSound] = useState(true);
   
+  // SLA Settings
+  const [slaEnabled, setSlaEnabled] = useState(true);
+  const [slaResponseTimeHours, setSlaResponseTimeHours] = useState("24");
+  const [slaResolutionTimeHours, setSlaResolutionTimeHours] = useState("72");
+  const [slaCriticalResponseHours, setSlaCriticalResponseHours] = useState("4");
+  const [slaCriticalResolutionHours, setSlaCriticalResolutionHours] = useState("24");
+  
   // Activity Logs
   const [activityLogs, setActivityLogs] = useState<any[]>([]);
   const [logsLoading, setLogsLoading] = useState(true);
@@ -151,6 +158,11 @@ export default function AdminSettings() {
         setRealtimeNewComplaint(data.realtime_new_complaint ?? true);
         setRealtimeStatusChange(data.realtime_status_change ?? true);
         setNotificationSound(data.notification_sound ?? true);
+        setSlaEnabled(data.sla_enabled ?? true);
+        setSlaResponseTimeHours(String(data.sla_response_time_hours ?? 24));
+        setSlaResolutionTimeHours(String(data.sla_resolution_time_hours ?? 72));
+        setSlaCriticalResponseHours(String(data.sla_critical_response_hours ?? 4));
+        setSlaCriticalResolutionHours(String(data.sla_critical_resolution_hours ?? 24));
         if (data.notification_email) {
           setNotificationEmail(data.notification_email);
         }
@@ -187,6 +199,11 @@ export default function AdminSettings() {
         realtime_new_complaint: realtimeNewComplaint,
         realtime_status_change: realtimeStatusChange,
         notification_sound: notificationSound,
+        sla_enabled: slaEnabled,
+        sla_response_time_hours: parseInt(slaResponseTimeHours),
+        sla_resolution_time_hours: parseInt(slaResolutionTimeHours),
+        sla_critical_response_hours: parseInt(slaCriticalResponseHours),
+        sla_critical_resolution_hours: parseInt(slaCriticalResolutionHours),
       };
 
       const { error } = await supabase
@@ -530,6 +547,111 @@ export default function AdminSettings() {
                   onCheckedChange={setNotificationSound}
                   disabled={!realtimeNotifications}
                 />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* SLA Configuration */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5" />
+                SLA (Service Level Agreement) Settings
+              </CardTitle>
+              <CardDescription>
+                Configure response and resolution time targets with automated alerts
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="sla-enabled" className="flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    Enable SLA tracking
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Monitor and enforce service level agreements
+                  </p>
+                </div>
+                <Switch
+                  id="sla-enabled"
+                  checked={slaEnabled}
+                  onCheckedChange={setSlaEnabled}
+                />
+              </div>
+
+              <Separator />
+
+              <div className="grid gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="sla-response-time">Standard Response Time (hours)</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Time allowed for first response to non-critical complaints
+                  </p>
+                  <Input
+                    id="sla-response-time"
+                    type="number"
+                    value={slaResponseTimeHours}
+                    onChange={(e) => setSlaResponseTimeHours(e.target.value)}
+                    disabled={!slaEnabled}
+                    min="1"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="sla-resolution-time">Standard Resolution Time (hours)</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Time allowed to resolve non-critical complaints
+                  </p>
+                  <Input
+                    id="sla-resolution-time"
+                    type="number"
+                    value={slaResolutionTimeHours}
+                    onChange={(e) => setSlaResolutionTimeHours(e.target.value)}
+                    disabled={!slaEnabled}
+                    min="1"
+                  />
+                </div>
+
+                <Separator />
+
+                <div className="space-y-2">
+                  <Label htmlFor="sla-critical-response">Critical Response Time (hours)</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Faster response time for critical priority complaints
+                  </p>
+                  <Input
+                    id="sla-critical-response"
+                    type="number"
+                    value={slaCriticalResponseHours}
+                    onChange={(e) => setSlaCriticalResponseHours(e.target.value)}
+                    disabled={!slaEnabled}
+                    min="1"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="sla-critical-resolution">Critical Resolution Time (hours)</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Faster resolution time for critical priority complaints
+                  </p>
+                  <Input
+                    id="sla-critical-resolution"
+                    type="number"
+                    value={slaCriticalResolutionHours}
+                    onChange={(e) => setSlaCriticalResolutionHours(e.target.value)}
+                    disabled={!slaEnabled}
+                    min="1"
+                  />
+                </div>
+              </div>
+
+              <div className="rounded-lg bg-muted p-4 space-y-2">
+                <p className="text-sm font-medium">SLA Alerts</p>
+                <p className="text-sm text-muted-foreground">
+                  Notifications will be sent to assigned admins when SLA thresholds are breached. 
+                  Visual indicators will appear on complaints approaching or exceeding SLA targets.
+                </p>
               </div>
             </CardContent>
           </Card>
