@@ -223,6 +223,47 @@ export type Database = {
           },
         ]
       }
+      complaint_history: {
+        Row: {
+          changed_by: string | null
+          complaint_id: string
+          created_at: string | null
+          event_type: string
+          id: string
+          metadata: Json | null
+          new_value: string | null
+          old_value: string | null
+        }
+        Insert: {
+          changed_by?: string | null
+          complaint_id: string
+          created_at?: string | null
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          new_value?: string | null
+          old_value?: string | null
+        }
+        Update: {
+          changed_by?: string | null
+          complaint_id?: string
+          created_at?: string | null
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          new_value?: string | null
+          old_value?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "complaint_history_complaint_id_fkey"
+            columns: ["complaint_id"]
+            isOneToOne: false
+            referencedRelation: "complaints"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       complaints: {
         Row: {
           assigned_to: string | null
