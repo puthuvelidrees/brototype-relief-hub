@@ -128,6 +128,41 @@ export type Database = {
         }
         Relationships: []
       }
+      complaint_comments: {
+        Row: {
+          comment: string
+          complaint_id: string
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment: string
+          complaint_id: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string
+          complaint_id?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "complaint_comments_complaint_id_fkey"
+            columns: ["complaint_id"]
+            isOneToOne: false
+            referencedRelation: "complaints"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       complaints: {
         Row: {
           category_id: string | null

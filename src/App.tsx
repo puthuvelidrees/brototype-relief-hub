@@ -8,6 +8,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import StudentPortal from "./pages/StudentPortal";
 import MyComplaints from "./pages/MyComplaints";
+import ComplaintDetail from "./pages/ComplaintDetail";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminSettings from "./pages/AdminSettings";
 import UserManagement from "./pages/UserManagement";
@@ -29,6 +30,7 @@ const App = () => (
                 <Route path="/" element={<StudentPortal />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/my-complaints" element={<MyComplaints />} />
+                <Route path="/complaint/:id" element={<ComplaintDetail />} />
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/admin/settings" element={<AdminSettings />} />
                 <Route path="/admin/users" element={<UserManagement />} />
