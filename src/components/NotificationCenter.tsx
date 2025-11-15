@@ -36,7 +36,6 @@ export default function NotificationCenter() {
   const [filteredNotifications, setFilteredNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
-  const [filterType, setFilterType] = useState<string>("all");
   const [filterRead, setFilterRead] = useState<string>("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [page, setPage] = useState(0);
@@ -106,11 +105,6 @@ export default function NotificationCenter() {
   const applyFilters = useCallback(() => {
     let filtered = notifications;
 
-    // Filter by type
-    if (filterType !== "all") {
-      filtered = filtered.filter(n => n.type === filterType);
-    }
-
     // Filter by read status
     if (filterRead === "unread") {
       filtered = filtered.filter(n => !n.is_read);
@@ -122,7 +116,7 @@ export default function NotificationCenter() {
     filtered = filtered.filter(n => !n.archived);
 
     setFilteredNotifications(filtered);
-  }, [notifications, filterType, filterRead]);
+  }, [notifications, filterRead]);
 
   useEffect(() => {
     applyFilters();
@@ -253,25 +247,11 @@ export default function NotificationCenter() {
         <DropdownMenuSeparator />
         
         {/* Filters */}
-        <div className="px-2 py-3 space-y-3">
+        <div className="px-2 py-3">
           <div className="space-y-2">
             <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
               <Filter className="h-3 w-3" />
-              Filter by Type
-            </label>
-            <Tabs value={filterType} onValueChange={setFilterType} className="w-full">
-              <TabsList className="grid w-full grid-cols-4 h-8">
-                <TabsTrigger value="all" className="text-xs">All</TabsTrigger>
-                <TabsTrigger value="complaint_action" className="text-xs">Complaints</TabsTrigger>
-                <TabsTrigger value="settings_update" className="text-xs">Settings</TabsTrigger>
-                <TabsTrigger value="user_action" className="text-xs">Users</TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-xs font-medium text-muted-foreground">
-              Filter by Status
+              Complaints
             </label>
             <Tabs value={filterRead} onValueChange={setFilterRead} className="w-full">
               <TabsList className="grid w-full grid-cols-3 h-8">
