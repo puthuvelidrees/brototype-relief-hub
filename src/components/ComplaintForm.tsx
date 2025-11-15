@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, FileText } from "lucide-react";
+import { Upload, FileText, MapPin } from "lucide-react";
 import { z } from "zod";
 
 const complaintSchema = z.object({
@@ -63,6 +63,7 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
   const [mobile, setMobile] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("");
   const [isLocationAutoDetected, setIsLocationAutoDetected] = useState(false);
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -98,60 +99,99 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
     fetchProfile();
   }, [user]);
 
-  // Auto-select location based on geolocation
+  // Function to detect location
+  const detectLocation = () => {
+    if (!navigator.geolocation) {
+      toast({
+        title: "Geolocation not supported",
+        description: "Your browser doesn't support geolocation. Please select your location manually.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsDetectingLocation(true);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        
+        // Location coordinates (approximate)
+        const locationCoords: Record<string, { lat: number; lng: number }> = {
+          "Kochi": { lat: 9.9312, lng: 76.2673 },
+          "Alappuzha": { lat: 9.4981, lng: 76.3388 },
+          "Kollam": { lat: 8.8932, lng: 76.6141 },
+          "Thiruvananthapuram": { lat: 8.5241, lng: 76.9366 },
+          "Ernakulam": { lat: 9.9312, lng: 76.2673 },
+        };
+
+        // Find nearest location
+        let nearestLocation = "";
+        let minDistance = Infinity;
+
+        locations.forEach((location) => {
+          const coords = locationCoords[location.name];
+          if (coords) {
+            const distance = Math.sqrt(
+              Math.pow(coords.lat - latitude, 2) + 
+              Math.pow(coords.lng - longitude, 2)
+            );
+            if (distance < minDistance) {
+              minDistance = distance;
+              nearestLocation = location.id;
+            }
+          }
+        });
+
+        if (nearestLocation) {
+          setSelectedLocation(nearestLocation);
+          setIsLocationAutoDetected(true);
+          toast({
+            title: "Location detected",
+            description: "We've selected the nearest location based on your current position.",
+          });
+        } else {
+          toast({
+            title: "Location not found",
+            description: "Couldn't find a matching location. Please select manually.",
+            variant: "destructive",
+          });
+        }
+        setIsDetectingLocation(false);
+      },
+      (error) => {
+        setIsDetectingLocation(false);
+        let errorMessage = "Please select your location manually.";
+        
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = "Location permission denied. Please enable location access in your browser settings or select manually.";
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = "Location information unavailable. Please select manually.";
+            break;
+          case error.TIMEOUT:
+            errorMessage = "Location request timed out. Please try again or select manually.";
+            break;
+        }
+        
+        toast({
+          title: "Location detection failed",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      },
+      {
+        timeout: 10000,
+        enableHighAccuracy: true,
+      }
+    );
+  };
+
+  // Auto-select location based on geolocation on mount
   useEffect(() => {
     if (locations.length === 0) return;
-
-    const autoSelectLocation = () => {
-      if (!navigator.geolocation) return;
-
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          
-          // Location coordinates (approximate)
-          const locationCoords: Record<string, { lat: number; lng: number }> = {
-            "Kochi": { lat: 9.9312, lng: 76.2673 },
-            "Alappuzha": { lat: 9.4981, lng: 76.3388 },
-            "Kollam": { lat: 8.8932, lng: 76.6141 },
-            "Thiruvananthapuram": { lat: 8.5241, lng: 76.9366 },
-            "Ernakulam": { lat: 9.9312, lng: 76.2673 },
-          };
-
-          // Find nearest location
-          let nearestLocation = "";
-          let minDistance = Infinity;
-
-          locations.forEach((location) => {
-            const coords = locationCoords[location.name];
-            if (coords) {
-              const distance = Math.sqrt(
-                Math.pow(coords.lat - latitude, 2) + 
-                Math.pow(coords.lng - longitude, 2)
-              );
-              if (distance < minDistance) {
-                minDistance = distance;
-                nearestLocation = location.id;
-              }
-            }
-          });
-
-          if (nearestLocation) {
-            setSelectedLocation(nearestLocation);
-            setIsLocationAutoDetected(true);
-            toast({
-              title: "Location detected",
-              description: "We've selected the nearest location based on your current position. You can change it if needed.",
-            });
-          }
-        },
-        (error) => {
-          console.log("Geolocation error:", error);
-        }
-      );
-    };
-
-    autoSelectLocation();
+    detectLocation();
   }, [locations]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -402,12 +442,25 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="location">{t.location}</Label>
-              {isLocationAutoDetected && (
-                <span className="text-xs text-muted-foreground flex items-center gap-1">
-                  <span className="h-2 w-2 rounded-full bg-primary animate-pulse"></span>
-                  Auto-detected
-                </span>
-              )}
+              <div className="flex items-center gap-2">
+                {isLocationAutoDetected && (
+                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                    <span className="h-2 w-2 rounded-full bg-primary animate-pulse"></span>
+                    Auto-detected
+                  </span>
+                )}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={detectLocation}
+                  disabled={isDetectingLocation}
+                  className="h-7 text-xs"
+                >
+                  <MapPin className="h-3 w-3 mr-1" />
+                  {isDetectingLocation ? "Detecting..." : "Detect Location"}
+                </Button>
+              </div>
             </div>
             <Select 
               name="location" 
