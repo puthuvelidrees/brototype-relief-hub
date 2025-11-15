@@ -23,6 +23,9 @@ export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(true);
   const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
+  const [position, setPosition] = useState({ x: window.innerWidth - 100, y: window.innerHeight - 100 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   
   const welcomeMessages: Record<string, string> = {
     en: "Hi! I'm here to help you with the complaint process. Ask me anything about submitting complaints, tracking them, or understanding the system.",
@@ -55,6 +58,46 @@ export default function Chatbot() {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging) return;
+      
+      const newX = e.clientX - dragStart.x;
+      const newY = e.clientY - dragStart.y;
+      
+      // Keep within viewport bounds
+      const maxX = window.innerWidth - (isOpen ? 380 : 64);
+      const maxY = window.innerHeight - (isOpen ? 600 : 64);
+      
+      setPosition({
+        x: Math.max(0, Math.min(newX, maxX)),
+        y: Math.max(0, Math.min(newY, maxY))
+      });
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, dragStart, isOpen]);
+
+  const handleDragStart = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setDragStart({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y
+    });
+  };
 
   const streamChat = async (userMessage: string) => {
     const userMsg: Message = { 
@@ -275,12 +318,19 @@ export default function Chatbot() {
       {/* Floating Chat Button */}
       {!isOpen && (
         <Button
-          onClick={() => {
-            setIsOpen(true);
-            setHasUnreadMessages(false);
+          onMouseDown={handleDragStart}
+          onClick={(e) => {
+            if (!isDragging) {
+              setIsOpen(true);
+              setHasUnreadMessages(false);
+            }
           }}
-          className="fixed bottom-6 h-16 w-16 rounded-full shadow-2xl z-50 relative ring-2 ring-primary/20"
-          style={{ right: '1.5rem' }}
+          className="fixed h-16 w-16 rounded-full shadow-2xl z-50 relative ring-2 ring-primary/20 cursor-move"
+          style={{ 
+            left: `${position.x}px`,
+            top: `${position.y}px`,
+            cursor: isDragging ? 'grabbing' : 'grab'
+          }}
           size="icon"
         >
           <MessageCircle className="h-7 w-7" />
@@ -295,9 +345,19 @@ export default function Chatbot() {
 
       {/* Chat Window */}
       {isOpen && (
-        <Card className="fixed bottom-6 w-[380px] h-[600px] shadow-2xl z-50 flex flex-col" style={{ right: '1.5rem' }}>
+        <Card 
+          className="fixed w-[380px] h-[600px] shadow-2xl z-50 flex flex-col" 
+          style={{ 
+            left: `${position.x}px`,
+            top: `${position.y}px`
+          }}
+        >
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b bg-primary text-primary-foreground rounded-t-lg">
+          <div 
+            className="flex items-center justify-between p-4 border-b bg-primary text-primary-foreground rounded-t-lg cursor-move"
+            onMouseDown={handleDragStart}
+            style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+          >
             <div className="flex items-center gap-2">
               <div className="h-10 w-10 rounded-full overflow-hidden bg-background flex items-center justify-center group">
                 <img 
