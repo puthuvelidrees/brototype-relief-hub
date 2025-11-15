@@ -14,6 +14,16 @@ const iconMap: Record<string, any> = {
   Building2, GraduationCap, Home, Bus, BookOpen, Trophy, Utensils, Laptop, Heart, MoreHorizontal
 };
 
+const getPriorityBadge = (priority: string) => {
+  const variants = {
+    low: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+    medium: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
+    high: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
+    critical: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+  };
+  return variants[priority as keyof typeof variants] || variants.medium;
+};
+
 interface Complaint {
   id: string;
   ticket_id: string;
@@ -21,6 +31,7 @@ interface Complaint {
   mobile: string;
   description: string;
   status: "pending" | "in_progress" | "resolved";
+  priority: "low" | "medium" | "high" | "critical";
   file_url: string | null;
   file_type: string | null;
   created_at: string;
@@ -126,10 +137,13 @@ export default function MyComplaints() {
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <CardTitle className="flex items-center gap-2">
+                        <CardTitle className="flex items-center gap-2 flex-wrap">
                           Ticket #{complaint.ticket_id}
                           <Badge className={getStatusColor(complaint.status)}>
                             {getStatusText(complaint.status).toUpperCase()}
+                          </Badge>
+                          <Badge className={getPriorityBadge(complaint.priority)}>
+                            {complaint.priority.toUpperCase()}
                           </Badge>
                         </CardTitle>
                         <CardDescription className="mt-2 flex flex-wrap items-center gap-4">

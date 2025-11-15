@@ -139,6 +139,7 @@ export type Database = {
           id: string
           location_id: string
           mobile: string
+          priority: Database["public"]["Enums"]["complaint_priority"]
           resolved_at: string | null
           status: Database["public"]["Enums"]["complaint_status"] | null
           student_name: string
@@ -156,6 +157,7 @@ export type Database = {
           id?: string
           location_id: string
           mobile: string
+          priority?: Database["public"]["Enums"]["complaint_priority"]
           resolved_at?: string | null
           status?: Database["public"]["Enums"]["complaint_status"] | null
           student_name: string
@@ -173,6 +175,7 @@ export type Database = {
           id?: string
           location_id?: string
           mobile?: string
+          priority?: Database["public"]["Enums"]["complaint_priority"]
           resolved_at?: string | null
           status?: Database["public"]["Enums"]["complaint_status"] | null
           student_name?: string
@@ -390,6 +393,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "student"
+      complaint_priority: "low" | "medium" | "high" | "critical"
       complaint_status: "pending" | "in_progress" | "resolved"
     }
     CompositeTypes: {
@@ -519,6 +523,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "student"],
+      complaint_priority: ["low", "medium", "high", "critical"],
       complaint_status: ["pending", "in_progress", "resolved"],
     },
   },
