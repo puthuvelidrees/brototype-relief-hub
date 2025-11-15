@@ -147,6 +147,43 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
       complaintSchema.parse(data);
       setIsLoading(true);
 
+      // Check rate limit before submitting
+      const { data: { session } } = await supabase.auth.getSession();
+      const { data: rateLimitData, error: rateLimitError } = await supabase.functions.invoke(
+        'check-complaint-rate-limit',
+        {
+          headers: {
+            Authorization: `Bearer ${session?.access_token}`,
+          },
+        }
+      );
+
+      if (rateLimitError) {
+        console.error('Rate limit check error:', rateLimitError);
+        throw new Error('Failed to check rate limit');
+      }
+
+      if (!rateLimitData.allowed) {
+        const resetDate = new Date(rateLimitData.resetTime);
+        const hoursUntilReset = Math.ceil((resetDate.getTime() - Date.now()) / (1000 * 60 * 60));
+        
+        toast({
+          title: "Rate Limit Exceeded",
+          description: `You have reached the maximum of ${rateLimitData.maxPerDay} complaints per day. Please try again in ${hoursUntilReset} hour(s).`,
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // Show remaining submissions warning
+      if (rateLimitData.remainingSubmissions <= 3 && rateLimitData.remainingSubmissions > 0) {
+        toast({
+          title: "Rate Limit Warning",
+          description: `You have ${rateLimitData.remainingSubmissions} complaint submission(s) remaining today.`,
+        });
+      }
+
       let fileUrl = null;
       let fileType = null;
 
