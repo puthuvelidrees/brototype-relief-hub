@@ -278,8 +278,12 @@ export default function Chatbot() {
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b bg-primary text-primary-foreground rounded-t-lg">
             <div className="flex items-center gap-2">
-              <div className="h-10 w-10 rounded-full overflow-hidden bg-background flex items-center justify-center">
-                <img src={brobotAvatar} alt="BroBot" className="h-full w-full object-cover" />
+              <div className="h-10 w-10 rounded-full overflow-hidden bg-background flex items-center justify-center group">
+                <img 
+                  src={brobotAvatar} 
+                  alt="BroBot" 
+                  className="h-full w-full object-cover animate-float group-hover:animate-wave cursor-pointer" 
+                />
               </div>
               <div>
                 <h3 className="font-semibold">{aiAssistantLabels[language] || aiAssistantLabels.en}</h3>
@@ -344,7 +348,11 @@ export default function Chatbot() {
                     )}
                   >
                     {message.role === "assistant" ? (
-                      <img src={brobotAvatar} alt="BroBot" className="h-full w-full object-cover" />
+                      <img 
+                        src={brobotAvatar} 
+                        alt="BroBot" 
+                        className="h-full w-full object-cover animate-bounce-in animate-blink" 
+                      />
                     ) : (
                       <User className="h-4 w-4" />
                     )}
@@ -380,8 +388,12 @@ export default function Chatbot() {
               ))}
               {isLoading && (
                 <div className="flex gap-3 items-start animate-fade-in">
-                  <div className="h-8 w-8 rounded-full overflow-hidden bg-background border-2 border-primary flex items-center justify-center animate-pulse">
-                    <img src={brobotAvatar} alt="BroBot" className="h-full w-full object-cover" />
+                  <div className="h-8 w-8 rounded-full overflow-hidden bg-background border-2 border-primary flex items-center justify-center">
+                    <img 
+                      src={brobotAvatar} 
+                      alt="BroBot" 
+                      className="h-full w-full object-cover animate-thinking" 
+                    />
                   </div>
                   <div className="rounded-lg px-4 py-3 bg-muted/80 backdrop-blur-sm border border-border/50 shadow-sm">
                     <div className="flex gap-1.5 items-center mb-2">
