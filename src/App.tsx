@@ -12,6 +12,7 @@ import ComplaintDetail from "./pages/ComplaintDetail";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminSettings from "./pages/AdminSettings";
 import UserManagement from "./pages/UserManagement";
+import Analytics from "./pages/Analytics";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -34,6 +35,7 @@ const App = () => (
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/admin/settings" element={<AdminSettings />} />
                 <Route path="/admin/users" element={<UserManagement />} />
+                <Route path="/admin/analytics" element={<Analytics />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </TooltipProvider>
