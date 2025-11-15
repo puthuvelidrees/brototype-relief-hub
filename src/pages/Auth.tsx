@@ -180,10 +180,13 @@ export default function Auth() {
   };
 
   useEffect(() => {
+    console.log('Auth redirect check:', { loading, user: !!user, isAdmin, isPasswordRecovery });
     if (!loading && user && !isPasswordRecovery) {
       if (isAdmin) {
+        console.log('Redirecting to /admin');
         navigate("/admin");
       } else {
+        console.log('Redirecting to /');
         navigate("/");
       }
     }

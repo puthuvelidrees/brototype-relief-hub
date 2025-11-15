@@ -30,6 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state changed:', event, 'Session:', !!session);
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -49,6 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               .eq("user_id", session.user.id)
               .eq("role", "admin")
               .maybeSingle();
+            console.log('Admin check result:', { userId: session.user.id, isAdmin: !!data });
             setIsAdmin(!!data);
             setLoading(false);
           }, 0);
@@ -61,6 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session check:', !!session);
       setSession(session);
       setUser(session?.user ?? null);
       
@@ -72,6 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             .eq("user_id", session.user.id)
             .eq("role", "admin")
             .maybeSingle();
+          console.log('Initial admin check result:', { userId: session.user.id, isAdmin: !!data });
           setIsAdmin(!!data);
           setLoading(false);
         }, 0);
