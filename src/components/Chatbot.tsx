@@ -100,6 +100,27 @@ export default function Chatbot() {
     window.addEventListener('keydown', handleKeyboard);
     return () => window.removeEventListener('keydown', handleKeyboard);
   }, [showHint, isOpen]);
+  // Adjust position when chat opens to ensure it's fully visible
+  useEffect(() => {
+    if (isOpen) {
+      const chatWidth = 380;
+      const chatHeight = isMinimized ? 200 : 600; // Approximate minimized height
+      const maxX = window.innerWidth - chatWidth;
+      const maxY = window.innerHeight - chatHeight;
+      
+      const adjustedPosition = {
+        x: Math.max(0, Math.min(position.x, maxX)),
+        y: Math.max(0, Math.min(position.y, maxY))
+      };
+      
+      // Only update if position needs adjustment
+      if (adjustedPosition.x !== position.x || adjustedPosition.y !== position.y) {
+        setPosition(adjustedPosition);
+        localStorage.setItem('chatbot-position', JSON.stringify(adjustedPosition));
+      }
+    }
+  }, [isOpen, isMinimized]);
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDragging) return;
