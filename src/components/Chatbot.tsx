@@ -23,7 +23,7 @@ export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(true);
   const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
-  const [position, setPosition] = useState({ x: window.innerWidth - 100, y: window.innerHeight - 100 });
+  const [position, setPosition] = useState({ x: window.innerWidth - 120, y: window.innerHeight - 120 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   
@@ -67,8 +67,8 @@ export default function Chatbot() {
       const newY = e.clientY - dragStart.y;
       
       // Keep within viewport bounds
-      const maxX = window.innerWidth - (isOpen ? 380 : 64);
-      const maxY = window.innerHeight - (isOpen ? 600 : 64);
+      const maxX = window.innerWidth - (isOpen ? 380 : 80);
+      const maxY = window.innerHeight - (isOpen ? 600 : 80);
       
       setPosition({
         x: Math.max(0, Math.min(newX, maxX)),
@@ -325,7 +325,7 @@ export default function Chatbot() {
               setHasUnreadMessages(false);
             }
           }}
-          className="fixed h-16 w-16 rounded-full shadow-2xl z-50 relative ring-2 ring-primary/20 cursor-move"
+          className="fixed h-20 w-20 rounded-full shadow-2xl z-50 relative ring-4 ring-primary/30 cursor-move animate-pulse"
           style={{ 
             left: `${position.x}px`,
             top: `${position.y}px`,
@@ -333,7 +333,7 @@ export default function Chatbot() {
           }}
           size="icon"
         >
-          <MessageCircle className="h-7 w-7" />
+          <MessageCircle className="h-10 w-10" />
           {hasUnreadMessages && (
             <span className="absolute -top-1 -right-1 h-4 w-4 bg-destructive rounded-full animate-ping" />
           )}
