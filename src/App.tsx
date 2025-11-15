@@ -14,6 +14,7 @@ import AdminSettings from "./pages/AdminSettings";
 import UserManagement from "./pages/UserManagement";
 import Analytics from "./pages/Analytics";
 import Auth from "./pages/Auth";
+import FAQ from "./pages/FAQ";
 import NotFound from "./pages/NotFound";
 import Chatbot from "./components/Chatbot";
 
@@ -33,6 +34,7 @@ const App = () => (
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/my-complaints" element={<MyComplaints />} />
                 <Route path="/complaint/:id" element={<ComplaintDetail />} />
+                <Route path="/faq" element={<FAQ />} />
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/admin/settings" element={<AdminSettings />} />
                 <Route path="/admin/users" element={<UserManagement />} />
