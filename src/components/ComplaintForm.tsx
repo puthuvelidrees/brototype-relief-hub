@@ -150,22 +150,30 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
       let fileUrl = null;
       let fileType = null;
 
+      // Upload file using validated edge function
       if (file) {
-        const fileExt = file.name.split(".").pop();
-        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+        const uploadFormData = new FormData();
+        uploadFormData.append('file', file);
         
-        const { error: uploadError } = await supabase.storage
-          .from("complaint-files")
-          .upload(fileName, file);
-
-        if (uploadError) throw uploadError;
-
-        const { data: urlData } = supabase.storage
-          .from("complaint-files")
-          .getPublicUrl(fileName);
+        const { data: { session } } = await supabase.auth.getSession();
         
-        fileUrl = urlData.publicUrl;
-        fileType = file.type;
+        const { data: uploadData, error: uploadError } = await supabase.functions.invoke(
+          'validate-file-upload',
+          {
+            body: uploadFormData,
+            headers: {
+              Authorization: `Bearer ${session?.access_token}`
+            }
+          }
+        );
+
+        if (uploadError || !uploadData?.success) {
+          console.error("Upload error:", uploadError || uploadData?.error);
+          throw new Error(uploadData?.error || "Failed to upload file");
+        }
+
+        fileUrl = uploadData.path;
+        fileType = uploadData.type;
       }
 
       const { error: insertError } = await supabase.from("complaints").insert([{

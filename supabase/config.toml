@@ -1,1 +1,4 @@
 project_id = "fvpjdjibxiengwmxthcf"
+
+[functions.validate-file-upload]
+verify_jwt = true
