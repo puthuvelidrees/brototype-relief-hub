@@ -27,9 +27,28 @@ const signInSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
+type PasswordStrength = "weak" | "medium" | "strong" | null;
+
+const calculatePasswordStrength = (password: string): PasswordStrength => {
+  if (!password) return null;
+  
+  let strength = 0;
+  if (password.length >= 12) strength++;
+  if (password.length >= 16) strength++;
+  if (/[A-Z]/.test(password)) strength++;
+  if (/[a-z]/.test(password)) strength++;
+  if (/[0-9]/.test(password)) strength++;
+  if (/[^A-Za-z0-9]/.test(password)) strength++;
+  
+  if (strength <= 2) return "weak";
+  if (strength <= 4) return "medium";
+  return "strong";
+};
+
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const [showResetForm, setShowResetForm] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState<PasswordStrength>(null);
   const { user, isAdmin, loading, signUp, signIn, resetPassword, updatePassword, isPasswordRecovery } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();
@@ -394,9 +413,38 @@ export default function Auth() {
                     id="signupPassword"
                     name="signupPassword"
                     type="password"
-                    placeholder="At least 6 characters"
+                    placeholder="At least 12 characters"
                     required
+                    onChange={(e) => setPasswordStrength(calculatePasswordStrength(e.target.value))}
                   />
+                  {passwordStrength && (
+                    <div className="space-y-1">
+                      <div className="flex gap-1">
+                        <div className={`h-1 flex-1 rounded-full transition-colors ${
+                          passwordStrength === "weak" ? "bg-destructive" : 
+                          passwordStrength === "medium" ? "bg-warning" : 
+                          "bg-success"
+                        }`} />
+                        <div className={`h-1 flex-1 rounded-full transition-colors ${
+                          passwordStrength === "medium" ? "bg-warning" : 
+                          passwordStrength === "strong" ? "bg-success" : 
+                          "bg-muted"
+                        }`} />
+                        <div className={`h-1 flex-1 rounded-full transition-colors ${
+                          passwordStrength === "strong" ? "bg-success" : "bg-muted"
+                        }`} />
+                      </div>
+                      <p className={`text-xs font-medium ${
+                        passwordStrength === "weak" ? "text-destructive" : 
+                        passwordStrength === "medium" ? "text-warning" : 
+                        "text-success"
+                      }`}>
+                        {passwordStrength === "weak" && "Weak - Add more characters and variety"}
+                        {passwordStrength === "medium" && "Medium - Getting better"}
+                        {passwordStrength === "strong" && "Strong - Excellent password!"}
+                      </p>
+                    </div>
+                  )}
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? t.loading : t.signUp}
