@@ -15,6 +15,7 @@ import UserManagement from "./pages/UserManagement";
 import Analytics from "./pages/Analytics";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import Chatbot from "./components/Chatbot";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,7 @@ const App = () => (
                 <Route path="/admin/analytics" element={<Analytics />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              <Chatbot />
             </TooltipProvider>
           </AuthProvider>
         </LanguageProvider>
