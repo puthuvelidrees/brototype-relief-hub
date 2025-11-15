@@ -95,25 +95,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       },
     });
     
-    if (!error && data.user) {
-      // Wait a bit for triggers to complete
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Check if user is admin before redirecting
-      const { data: roleData } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", data.user.id)
-        .eq("role", "admin")
-        .maybeSingle();
-      
-      // Redirect based on role
-      if (roleData) {
-        navigate("/admin");
-      } else {
-        navigate("/");
-      }
-    }
+    // Don't redirect here - let the Auth page handle redirect after isAdmin is set
+    // The onAuthStateChange will update user and isAdmin states
     
     return { error };
   };
@@ -124,22 +107,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       password,
     });
     
-    if (!error && data.user) {
-      // Check if user is admin before redirecting
-      const { data: roleData } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", data.user.id)
-        .eq("role", "admin")
-        .maybeSingle();
-      
-      // Redirect based on role
-      if (roleData) {
-        navigate("/admin");
-      } else {
-        navigate("/");
-      }
-    }
+    // Don't redirect here - let the Auth page handle redirect after isAdmin is set
+    // The onAuthStateChange will update user and isAdmin states
     
     return { error };
   };
