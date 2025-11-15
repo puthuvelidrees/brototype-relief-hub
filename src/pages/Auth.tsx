@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useNavigate } from "react-router-dom";
@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { Check, X, Eye, EyeOff } from "lucide-react";
+import confetti from "canvas-confetti";
 
 const signUpSchema = z.object({
   email: z.string().trim().email("Invalid email address"),
@@ -94,10 +95,52 @@ export default function Auth() {
   const [showSignUpPassword, setShowSignUpPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const hasShownConfetti = useRef(false);
   const { user, isAdmin, loading, signUp, signIn, resetPassword, updatePassword, isPasswordRecovery } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Trigger confetti when password becomes strong
+  useEffect(() => {
+    if (passwordStrength === "strong" && !hasShownConfetti.current) {
+      hasShownConfetti.current = true;
+      
+      // Fire confetti from multiple angles
+      const duration = 2000;
+      const animationEnd = Date.now() + duration;
+      const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
+
+      const randomInRange = (min: number, max: number) => {
+        return Math.random() * (max - min) + min;
+      };
+
+      const interval = setInterval(() => {
+        const timeLeft = animationEnd - Date.now();
+
+        if (timeLeft <= 0) {
+          clearInterval(interval);
+          return;
+        }
+
+        const particleCount = 50 * (timeLeft / duration);
+        
+        confetti({
+          ...defaults,
+          particleCount,
+          origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+        });
+        confetti({
+          ...defaults,
+          particleCount,
+          origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+        });
+      }, 250);
+    } else if (passwordStrength !== "strong") {
+      // Reset confetti flag when password becomes weak/medium again
+      hasShownConfetti.current = false;
+    }
+  }, [passwordStrength]);
 
   useEffect(() => {
     if (!loading && user && !isPasswordRecovery) {
