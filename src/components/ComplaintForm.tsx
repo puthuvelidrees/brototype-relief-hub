@@ -150,12 +150,6 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
             title: "Location detected",
             description: "We've selected the nearest location based on your current position.",
           });
-        } else {
-          toast({
-            title: "Location not found",
-            description: "Couldn't find a matching location. Please select manually.",
-            variant: "destructive",
-          });
         }
         setIsDetectingLocation(false);
       },
