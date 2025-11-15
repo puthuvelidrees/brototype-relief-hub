@@ -193,10 +193,10 @@ export default function Chatbot() {
   };
 
   const aiAssistantLabels: Record<string, string> = {
-    en: "AI Assistant",
-    hi: "AI सहायक",
-    ml: "AI അസിസ്റ്റന്റ്",
-    ta: "AI உதவியாளர்"
+    en: "BroBot",
+    hi: "BroBot",
+    ml: "BroBot",
+    ta: "BroBot"
   };
 
   const alwaysHereLabels: Record<string, string> = {
