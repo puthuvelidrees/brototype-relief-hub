@@ -14,6 +14,99 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_logs: {
+        Row: {
+          action_description: string
+          action_type: string
+          created_at: string | null
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          metadata: Json | null
+          user_id: string | null
+        }
+        Insert: {
+          action_description: string
+          action_type: string
+          created_at?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          metadata?: Json | null
+          user_id?: string | null
+        }
+        Update: {
+          action_description?: string
+          action_type?: string
+          created_at?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          metadata?: Json | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      admin_settings: {
+        Row: {
+          auto_assign_complaints: boolean | null
+          created_at: string | null
+          daily_digest: boolean | null
+          default_complaint_status: string | null
+          email_notifications: boolean | null
+          id: string
+          max_complaints_per_day: number | null
+          new_complaint_notification: boolean | null
+          notification_email: string | null
+          notification_sound: boolean | null
+          realtime_new_complaint: boolean | null
+          realtime_notifications: boolean | null
+          realtime_status_change: boolean | null
+          require_approval: boolean | null
+          status_change_notification: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          auto_assign_complaints?: boolean | null
+          created_at?: string | null
+          daily_digest?: boolean | null
+          default_complaint_status?: string | null
+          email_notifications?: boolean | null
+          id?: string
+          max_complaints_per_day?: number | null
+          new_complaint_notification?: boolean | null
+          notification_email?: string | null
+          notification_sound?: boolean | null
+          realtime_new_complaint?: boolean | null
+          realtime_notifications?: boolean | null
+          realtime_status_change?: boolean | null
+          require_approval?: boolean | null
+          status_change_notification?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          auto_assign_complaints?: boolean | null
+          created_at?: string | null
+          daily_digest?: boolean | null
+          default_complaint_status?: string | null
+          email_notifications?: boolean | null
+          id?: string
+          max_complaints_per_day?: number | null
+          new_complaint_notification?: boolean | null
+          notification_email?: string | null
+          notification_sound?: boolean | null
+          realtime_new_complaint?: boolean | null
+          realtime_notifications?: boolean | null
+          realtime_status_change?: boolean | null
+          require_approval?: boolean | null
+          status_change_notification?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           created_at: string | null
@@ -147,6 +240,42 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          created_at: string | null
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          is_read: boolean | null
+          message: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          is_read?: boolean | null
+          message: string
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -204,6 +333,17 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      insert_system_activity_log: {
+        Args: {
+          p_action_description: string
+          p_action_type: string
+          p_entity_id?: string
+          p_entity_type?: string
+          p_metadata?: Json
+          p_user_id: string
+        }
+        Returns: string
       }
     }
     Enums: {
