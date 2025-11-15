@@ -68,6 +68,28 @@ export type TranslationKeys = {
   stillNeedHelp: string;
   contactSupport: string;
   faqs: Array<{ question: string; answer: string }>;
+  
+  // Rating System
+  rateResolution: string;
+  rateResolutionDescription: string;
+  rating: string;
+  feedback: string;
+  optional: string;
+  feedbackPlaceholder: string;
+  submitRating: string;
+  updateRating: string;
+  editRating: string;
+  yourRating: string;
+  yourFeedback: string;
+  pleaseSelectRating: string;
+  ratingSubmitted: string;
+  ratingUpdated: string;
+  submitting: string;
+  ratingPoor: string;
+  ratingFair: string;
+  ratingGood: string;
+  ratingVeryGood: string;
+  ratingExcellent: string;
 };
 
 export const translations: Record<Language, TranslationKeys> = {
@@ -179,7 +201,29 @@ export const translations: Record<Language, TranslationKeys> = {
         question: 'Who can see my complaint?',
         answer: 'Only you and the admin team can see your complaint details. Your information is kept confidential and used solely for resolving your issue.'
       }
-    ]
+    ],
+    
+    // Rating System
+    rateResolution: 'Rate Resolution Quality',
+    rateResolutionDescription: 'Help us improve by rating how satisfied you are with the resolution',
+    rating: 'Rating',
+    feedback: 'Feedback',
+    optional: 'Optional',
+    feedbackPlaceholder: 'Share your experience (optional)...',
+    submitRating: 'Submit Rating',
+    updateRating: 'Update Rating',
+    editRating: 'Edit Rating',
+    yourRating: 'Your Rating',
+    yourFeedback: 'Your Feedback',
+    pleaseSelectRating: 'Please select a rating',
+    ratingSubmitted: 'Thank you for your feedback!',
+    ratingUpdated: 'Rating updated successfully',
+    submitting: 'Submitting...',
+    ratingPoor: 'Poor',
+    ratingFair: 'Fair',
+    ratingGood: 'Good',
+    ratingVeryGood: 'Very Good',
+    ratingExcellent: 'Excellent'
   },
   hi: {
     // Navbar
@@ -289,7 +333,29 @@ export const translations: Record<Language, TranslationKeys> = {
         question: 'मेरी शिकायत कौन देख सकता है?',
         answer: 'केवल आप और व्यवस्थापक टीम आपकी शिकायत का विवरण देख सकते हैं। आपकी जानकारी गोपनीय रखी जाती है।'
       }
-    ]
+    ],
+    
+    // Rating System
+    rateResolution: 'समाधान की गुणवत्ता को रेट करें',
+    rateResolutionDescription: 'समाधान से आप कितने संतुष्ट हैं, यह रेट करके हमें बेहतर बनाने में मदद करें',
+    rating: 'रेटिंग',
+    feedback: 'प्रतिक्रिया',
+    optional: 'वैकल्पिक',
+    feedbackPlaceholder: 'अपना अनुभव साझा करें (वैकल्पिक)...',
+    submitRating: 'रेटिंग जमा करें',
+    updateRating: 'रेटिंग अपडेट करें',
+    editRating: 'रेटिंग संपादित करें',
+    yourRating: 'आपकी रेटिंग',
+    yourFeedback: 'आपकी प्रतिक्रिया',
+    pleaseSelectRating: 'कृपया एक रेटिंग चुनें',
+    ratingSubmitted: 'आपकी प्रतिक्रिया के लिए धन्यवाद!',
+    ratingUpdated: 'रेटिंग सफलतापूर्वक अपडेट की गई',
+    submitting: 'जमा हो रहा है...',
+    ratingPoor: 'खराब',
+    ratingFair: 'ठीक',
+    ratingGood: 'अच्छा',
+    ratingVeryGood: 'बहुत अच्छा',
+    ratingExcellent: 'उत्कृष्ट'
   },
   ml: {
     // Navbar
@@ -399,7 +465,29 @@ export const translations: Record<Language, TranslationKeys> = {
         question: 'എന്റെ പരാതി ആർക്കൊക്കെ കാണാൻ കഴിയും?',
         answer: 'നിങ്ങൾക്കും അഡ്‌മിൻ ടീമിനും മാത്രമേ നിങ്ങളുടെ പരാതി വിശദാംശങ്ങൾ കാണാൻ കഴിയൂ. നിങ്ങളുടെ വിവരങ്ങൾ രഹസ്യമായി സൂക്ഷിക്കുന്നു.'
       }
-    ]
+    ],
+    
+    // Rating System
+    rateResolution: 'പരിഹാര നിലവാരം റേറ്റ് ചെയ്യുക',
+    rateResolutionDescription: 'പരിഹാരത്തിൽ നിങ്ങൾ എത്രമാത്രം സംതൃപ്തരാണെന്ന് റേറ്റ് ചെയ്ത് ഞങ്ങളെ മെച്ചപ്പെടുത്താൻ സഹായിക്കുക',
+    rating: 'റേറ്റിംഗ്',
+    feedback: 'ഫീഡ്‌ബാക്ക്',
+    optional: 'ഓപ്ഷണൽ',
+    feedbackPlaceholder: 'നിങ്ങളുടെ അനുഭവം പങ്കിടുക (ഓപ്ഷണൽ)...',
+    submitRating: 'റേറ്റിംഗ് സമർപ്പിക്കുക',
+    updateRating: 'റേറ്റിംഗ് അപ്‌ഡേറ്റ് ചെയ്യുക',
+    editRating: 'റേറ്റിംഗ് എഡിറ്റ് ചെയ്യുക',
+    yourRating: 'നിങ്ങളുടെ റേറ്റിംഗ്',
+    yourFeedback: 'നിങ്ങളുടെ ഫീഡ്‌ബാക്ക്',
+    pleaseSelectRating: 'ദയവായി ഒരു റേറ്റിംഗ് തിരഞ്ഞെടുക്കുക',
+    ratingSubmitted: 'നിങ്ങളുടെ ഫീഡ്‌ബാക്കിന് നന്ദി!',
+    ratingUpdated: 'റേറ്റിംഗ് വിജയകരമായി അപ്‌ഡേറ്റ് ചെയ്തു',
+    submitting: 'സമർപ്പിക്കുന്നു...',
+    ratingPoor: 'മോശം',
+    ratingFair: 'സാധാരണം',
+    ratingGood: 'നല്ലത്',
+    ratingVeryGood: 'വളരെ നല്ലത്',
+    ratingExcellent: 'മികച്ചത്'
   },
   ta: {
     // Navbar
@@ -509,6 +597,28 @@ export const translations: Record<Language, TranslationKeys> = {
         question: 'எனது புகாரை யார் பார்க்க முடியும்?',
         answer: 'நீங்களும் நிர்வாகக் குழுவும் மட்டுமே உங்கள் புகார் விவரங்களைப் பார்க்க முடியும். உங்கள் தகவல் ரகசியமாக வைக்கப்படுகிறது.'
       }
-    ]
+    ],
+    
+    // Rating System
+    rateResolution: 'தீர்வு தரத்தை மதிப்பிடுங்கள்',
+    rateResolutionDescription: 'தீர்வில் நீங்கள் எவ்வளவு திருப்தியடைந்தீர்கள் என்பதை மதிப்பிட்டு எங்களை மேம்படுத்த உதவுங்கள்',
+    rating: 'மதிப்பீடு',
+    feedback: 'கருத்து',
+    optional: 'விருப்பமானது',
+    feedbackPlaceholder: 'உங்கள் அனுபவத்தைப் பகிரவும் (விருப்பமானது)...',
+    submitRating: 'மதிப்பீடு சமர்ப்பிக்கவும்',
+    updateRating: 'மதிப்பீட்டை புதுப்பிக்கவும்',
+    editRating: 'மதிப்பீட்டை திருத்தவும்',
+    yourRating: 'உங்கள் மதிப்பீடு',
+    yourFeedback: 'உங்கள் கருத்து',
+    pleaseSelectRating: 'தயவுசெய்து ஒரு மதிப்பீட்டைத் தேர்ந்தெடுக்கவும்',
+    ratingSubmitted: 'உங்கள் கருத்துக்கு நன்றி!',
+    ratingUpdated: 'மதிப்பீடு வெற்றிகரமாக புதுப்பிக்கப்பட்டது',
+    submitting: 'சமர்ப்பிக்கிறது...',
+    ratingPoor: 'மோசமானது',
+    ratingFair: 'நியாயமானது',
+    ratingGood: 'நல்லது',
+    ratingVeryGood: 'மிகவும் நல்லது',
+    ratingExcellent: 'சிறந்தது'
   },
 };
