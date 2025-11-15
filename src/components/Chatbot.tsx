@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useNavigate } from "react-router-dom";
+import brobotAvatar from "@/assets/brobot-avatar.png";
 
 interface Message {
   role: "user" | "assistant";
@@ -277,7 +278,9 @@ export default function Chatbot() {
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b bg-primary text-primary-foreground rounded-t-lg">
             <div className="flex items-center gap-2">
-              <Bot className="h-5 w-5" />
+              <div className="h-10 w-10 rounded-full overflow-hidden bg-background flex items-center justify-center">
+                <img src={brobotAvatar} alt="BroBot" className="h-full w-full object-cover" />
+              </div>
               <div>
                 <h3 className="font-semibold">{aiAssistantLabels[language] || aiAssistantLabels.en}</h3>
                 <p className="text-xs opacity-90">{alwaysHereLabels[language] || alwaysHereLabels.en}</p>
@@ -334,14 +337,14 @@ export default function Chatbot() {
                 >
                   <div
                     className={cn(
-                      "h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0",
+                      "h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden",
                       message.role === "assistant"
-                        ? "bg-primary text-primary-foreground"
+                        ? "bg-background border-2 border-primary"
                         : "bg-secondary text-secondary-foreground"
                     )}
                   >
                     {message.role === "assistant" ? (
-                      <Bot className="h-4 w-4" />
+                      <img src={brobotAvatar} alt="BroBot" className="h-full w-full object-cover" />
                     ) : (
                       <User className="h-4 w-4" />
                     )}
@@ -377,8 +380,8 @@ export default function Chatbot() {
               ))}
               {isLoading && (
                 <div className="flex gap-3 items-start animate-fade-in">
-                  <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center animate-pulse">
-                    <Bot className="h-4 w-4" />
+                  <div className="h-8 w-8 rounded-full overflow-hidden bg-background border-2 border-primary flex items-center justify-center animate-pulse">
+                    <img src={brobotAvatar} alt="BroBot" className="h-full w-full object-cover" />
                   </div>
                   <div className="rounded-lg px-4 py-3 bg-muted/80 backdrop-blur-sm border border-border/50 shadow-sm">
                     <div className="flex gap-1.5 items-center mb-2">
