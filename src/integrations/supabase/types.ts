@@ -47,8 +47,36 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_availability: {
+        Row: {
+          created_at: string
+          id: string
+          is_available: boolean
+          last_assigned_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_available?: boolean
+          last_assigned_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_available?: boolean
+          last_assigned_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       admin_settings: {
         Row: {
+          assignment_method: string | null
           auto_assign_complaints: boolean | null
           created_at: string | null
           daily_digest: boolean | null
@@ -68,6 +96,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          assignment_method?: string | null
           auto_assign_complaints?: boolean | null
           created_at?: string | null
           daily_digest?: boolean | null
@@ -87,6 +116,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          assignment_method?: string | null
           auto_assign_complaints?: boolean | null
           created_at?: string | null
           daily_digest?: boolean | null
@@ -165,6 +195,7 @@ export type Database = {
       }
       complaints: {
         Row: {
+          assigned_to: string | null
           category_id: string | null
           created_at: string | null
           description: string
@@ -183,6 +214,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          assigned_to?: string | null
           category_id?: string | null
           created_at?: string | null
           description: string
@@ -201,6 +233,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          assigned_to?: string | null
           category_id?: string | null
           created_at?: string | null
           description?: string
@@ -394,6 +427,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      auto_assign_complaint: { Args: { complaint_id: string }; Returns: string }
       cleanup_old_login_attempts: { Args: never; Returns: undefined }
       generate_ticket_id: { Args: never; Returns: string }
       has_role: {

@@ -48,6 +48,10 @@ interface Complaint {
   priority: "low" | "medium" | "high" | "critical";
   file_url: string | null;
   created_at: string;
+  assigned_to: string | null;
+  assigned_admin?: {
+    full_name: string | null;
+  };
   locations: { name: string };
   domains: { name: string };
   categories: { name: string; icon_name: string } | null;
@@ -147,7 +151,7 @@ export default function AdminDashboard() {
   }, [search, selectedCategory, selectedPriority, complaints]);
 
   const fetchComplaints = async () => {
-    const { data, error } = await supabase
+    const { data: complaintsData, error: complaintsError } = await supabase
       .from("complaints")
       .select(`
         *,
@@ -157,10 +161,41 @@ export default function AdminDashboard() {
       `)
       .order("created_at", { ascending: false });
 
-    if (!error && data) {
-      setComplaints(data);
-      setFilteredComplaints(data);
+    if (complaintsError || !complaintsData) {
+      setComplaints([]);
+      setFilteredComplaints([]);
+      setIsLoading(false);
+      return;
     }
+
+    // Fetch assigned admin profiles
+    const assignedIds = complaintsData
+      .filter(c => c.assigned_to)
+      .map(c => c.assigned_to);
+
+    let profilesMap: Record<string, { full_name: string | null }> = {};
+    if (assignedIds.length > 0) {
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, full_name")
+        .in("id", assignedIds);
+
+      if (profiles) {
+        profilesMap = profiles.reduce((acc, p) => {
+          acc[p.id] = { full_name: p.full_name };
+          return acc;
+        }, {} as Record<string, { full_name: string | null }>);
+      }
+    }
+
+    // Combine data
+    const enriched = complaintsData.map(c => ({
+      ...c,
+      assigned_admin: c.assigned_to ? profilesMap[c.assigned_to] : undefined
+    }));
+
+    setComplaints(enriched);
+    setFilteredComplaints(enriched);
     setIsLoading(false);
   };
 
@@ -434,6 +469,11 @@ export default function AdminDashboard() {
                           <Badge className={getPriorityBadge(complaint.priority)}>
                             {complaint.priority.toUpperCase()}
                           </Badge>
+                          {complaint.assigned_admin && (
+                            <Badge variant="outline" className="bg-blue-50 dark:bg-blue-950">
+                              Assigned: {complaint.assigned_admin.full_name || "Unknown"}
+                            </Badge>
+                          )}
                         </div>
                         <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                           <span className="flex items-center gap-1">

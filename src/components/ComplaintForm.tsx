@@ -219,20 +219,31 @@ export default function ComplaintForm({ onSuccess }: { onSuccess: () => void }) 
         fileType = uploadData.type;
       }
 
-      const { error: insertError } = await supabase.from("complaints").insert([{
-        user_id: user.id,
-        student_name: data.name,
-        mobile: data.mobile,
-        location_id: data.locationId,
-        domain_id: data.domainId,
-        category_id: data.categoryId,
-        priority: data.priority,
-        description: data.description,
-        file_url: fileUrl,
-        file_type: fileType,
-      }] as any);
+      const { data: insertData, error: insertError } = await supabase
+        .from("complaints")
+        .insert([{
+          user_id: user.id,
+          student_name: data.name,
+          mobile: data.mobile,
+          location_id: data.locationId,
+          domain_id: data.domainId,
+          category_id: data.categoryId,
+          priority: data.priority,
+          description: data.description,
+          file_url: fileUrl,
+          file_type: fileType,
+        }] as any)
+        .select()
+        .single();
 
       if (insertError) throw insertError;
+
+      // Trigger auto-assignment in background (don't wait for it)
+      if (insertData?.id) {
+        supabase.functions.invoke('auto-assign-complaint', {
+          body: { complaintId: insertData.id }
+        }).catch(err => console.error('Auto-assignment failed:', err));
+      }
 
       toast({
         title: "Success!",
