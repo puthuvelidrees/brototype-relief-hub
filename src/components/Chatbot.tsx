@@ -280,9 +280,9 @@ export default function Chatbot() {
             setHasUnreadMessages(false);
           }}
           className={cn(
-            "fixed bottom-6 right-6 h-16 w-16 rounded-full shadow-2xl z-50 relative ring-2 ring-primary/20",
-            hasUnreadMessages && "animate-pulse-glow"
+            "fixed bottom-6 right-6 h-16 w-16 rounded-full shadow-2xl z-50 relative ring-2 ring-primary/20"
           )}
+          style={{ right: '1.5rem' }}
           size="icon"
         >
           <MessageCircle className="h-7 w-7" />
@@ -297,7 +297,7 @@ export default function Chatbot() {
 
       {/* Chat Window */}
       {isOpen && (
-        <Card className="fixed bottom-6 right-6 w-[380px] h-[600px] shadow-2xl z-50 flex flex-col">
+        <Card className="fixed bottom-6 right-6 w-[380px] h-[600px] shadow-2xl z-50 flex flex-col" style={{ right: '1.5rem' }}>
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b bg-primary text-primary-foreground rounded-t-lg">
             <div className="flex items-center gap-2">
