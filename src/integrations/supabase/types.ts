@@ -240,6 +240,36 @@ export type Database = {
         }
         Relationships: []
       }
+      login_attempts: {
+        Row: {
+          attempt_time: string
+          created_at: string | null
+          email: string
+          id: string
+          ip_address: string | null
+          success: boolean
+          user_agent: string | null
+        }
+        Insert: {
+          attempt_time?: string
+          created_at?: string | null
+          email: string
+          id?: string
+          ip_address?: string | null
+          success?: boolean
+          user_agent?: string | null
+        }
+        Update: {
+          attempt_time?: string
+          created_at?: string | null
+          email?: string
+          id?: string
+          ip_address?: string | null
+          success?: boolean
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string | null
@@ -326,6 +356,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cleanup_old_login_attempts: { Args: never; Returns: undefined }
       generate_ticket_id: { Args: never; Returns: string }
       has_role: {
         Args: {

@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { Check, X, Eye, EyeOff } from "lucide-react";
 import confetti from "canvas-confetti";
+import { supabase } from "@/integrations/supabase/client";
 
 const signUpSchema = z.object({
   email: z.string().trim().email("Invalid email address"),
@@ -254,13 +255,48 @@ export default function Auth() {
       signInSchema.parse(data);
       setIsLoading(true);
 
+      // Check if account is locked before attempting login
+      const { data: checkData, error: checkError } = await supabase.functions.invoke(
+        'check-login-attempt',
+        {
+          body: {
+            email: data.email,
+            success: false, // We're checking before knowing if it will succeed
+            userAgent: navigator.userAgent
+          }
+        }
+      );
+
+      if (checkError || !checkData?.allowed) {
+        toast({
+          title: "Account Locked",
+          description: checkData?.message || "Too many failed login attempts. Please try again later.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
       const { error } = await signIn(data.email, data.password);
 
+      // Log the attempt result
+      await supabase.functions.invoke('check-login-attempt', {
+        body: {
+          email: data.email,
+          success: !error,
+          userAgent: navigator.userAgent
+        }
+      });
+
       if (error) {
+        const attemptsRemaining = checkData?.attemptsRemaining || 0;
+        
         if (error.message.includes("Invalid login credentials")) {
           toast({
             title: "Login failed",
-            description: "Invalid email or password. Please try again.",
+            description: attemptsRemaining > 0 
+              ? `Invalid email or password. ${attemptsRemaining - 1} attempt(s) remaining before account lockout.`
+              : "Invalid email or password. Please try again.",
             variant: "destructive",
           });
         } else {
