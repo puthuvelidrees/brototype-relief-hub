@@ -175,16 +175,25 @@ export default function MyComplaints() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm mb-4">{complaint.description}</p>
-                    {complaint.file_url && (
+                    <div className="flex gap-2">
                       <Button
-                        variant="outline"
+                        variant="default"
                         size="sm"
-                        onClick={() => window.open(complaint.file_url!, "_blank")}
+                        onClick={() => navigate(`/complaint/${complaint.id}`)}
                       >
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        View Attachment
+                        View Details & Comments
                       </Button>
-                    )}
+                      {complaint.file_url && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open(complaint.file_url!, "_blank")}
+                        >
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          Attachment
+                        </Button>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               ))}

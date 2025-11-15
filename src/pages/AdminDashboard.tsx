@@ -337,7 +337,15 @@ export default function AdminDashboard() {
 
                     <p className="text-sm">{complaint.description}</p>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => navigate(`/complaint/${complaint.id}`)}
+                      >
+                        View Details & Comments
+                      </Button>
+                      
                       {complaint.file_url && (
                         <Button
                           variant="outline"
